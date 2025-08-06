@@ -6,9 +6,7 @@ os.environ["OPENBLAS_NUM_THREADS"] = "8"
 os.environ["NUMEXPR_NUM_THREADS"] = "8" 
 os.environ["XLA_FLAGS"] = "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=8"
 #os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
-os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.95"
-
-
+os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.4"
 
 import jax
 import jax.numpy as jnp
@@ -72,6 +70,8 @@ def objective(trial):
     # initialization of the model
     model = UFNO3d(in_channels=2, out_channels=1, modes_x=modes, modes_y=modes, modes_z=modes, width=width, p_do= p_do, key=jax.random.PRNGKey(0))  
     
+    # load predefine model (before model needs to be initialized with the same hyperparameters (modes, width) as the saved model)
+    #model = eqx.tree_deserialise_leaves("saved_models/d3_ufno_time_density.eqx", model)
 
     # initialization of the optimizer (including lr schedule)
     schedule = optax.exponential_decay(lr_start, n_batches_train* num_epochs, dr)
@@ -97,7 +97,6 @@ def objective(trial):
 
 
     # different loss functions we tried 
-
     def mse_loss(model, x, y, key=None, deterministic=False):
         y_pred = jax.vmap(model, in_axes=(0, None, None))(x, key, deterministic)  
         return jnp.mean(jnp.square(y_pred - y))
@@ -144,7 +143,6 @@ def objective(trial):
     
 
     # definition of training and evaluation/validation steps
-
     @eqx.filter_jit(donate="all")
     def train_step(model, opt_state, key, x, y, sharding):
         replicated = sharding.replicate()
@@ -219,14 +217,6 @@ def objective(trial):
 
     return test_loss
 
-
-
-    
-
-
-
-
-
    
 if __name__ == "__main__":
     print("Starting...")
@@ -263,7 +253,7 @@ if __name__ == "__main__":
 
     print("Preprocessing and division into training, validation and test set finished.")
 
-    # start the Optuna study and print out best parameters
+    # start the Optuna (adjust number of trials) study and print out best parameters
     study = optuna.create_study(direction="minimize", study_name="3d-study")
     study.optimize(objective, n_trials=1 , n_jobs=1, gc_after_trial=True, show_progress_bar=True)
     print("Best parameters:", study.best_params)
