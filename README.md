@@ -137,6 +137,9 @@ Optimal hyperparameters for the steady-state model and its training:
 |-----------------------------------------|---------------------------------------|
 | Number of Layers      |     X           | Initial Learning Rate    |     X      | 
 | Width                 |     Y           | Decay Rate               |     X      | 
+
+
+
 | Modes                 |     X           | Weight Decay             |     X      | 
 | Kernel Size           |     X           | Dropout Probability      |     X      |  
 | U-Net Width           |     X           | $\lambda$ in Loss        |     X      | 
