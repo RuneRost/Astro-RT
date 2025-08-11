@@ -134,7 +134,7 @@ Our model achieves the following performance on the test set:
 Optimal hyperparameters for the steady-state model and its training:
 
 | Model hyperparameters| Value           | Training hyperparameters | Value      | 
-| ---------------------------------------|---------------------------------------|
+|----------------------------------------|---------------------------------------|
 | Number of Layers     |     X           | Initial Learning Rate    |     X      | 
 | Width                |     Y           | Decay Rate               |     X      | 
 | Modes                |     X           | Weight Decay             |     X      | 
@@ -144,7 +144,7 @@ Optimal hyperparameters for the steady-state model and its training:
 Optimal hyperparameters for the recurrent model and its training:
 
 | Model hyperparameters| Value           | Training hyperparameters | Value      | 
-| ---------------------------------------|---------------------------------------|
+|----------------------------------------|---------------------------------------|
 | Number of Layers     |     X           | Initial Learning Rate    |     X      | 
 | Width                |     Y           | Decay Rate               |     X      | 
 | Modes                |     X           | Weight Decay             |     X      | 
