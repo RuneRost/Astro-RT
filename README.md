@@ -6,6 +6,26 @@ This repository is the official implementation of [Emulating Radiative Transfer 
 
 Radiative transfer - cornerstone - ... - gifs und plots die einfach Vorhersage zeigen, Ergebnisplots dann unten
 
+hier ein GIF hin in 3D wie sich radiative transfer entwickelt bzw wenn nicht möglich dann einfach 3D static plots von a,j,I
+
+
+Radiative transfer is a cornerstone of computational astrophysics, providing the essential link between physical models and observational diagnostics. Simulating the propagation of radiation through astrophysical media, such as stellar atmospheres, interstellar clouds, or galaxy clusters, requires solving the radiative transfer equation (RTE). 
+Due to its high dimensionality (dependence on time $t$, spatial position $x$, direction $\omega$, and frequency $\nu$) the RTE is highly complex and computationally expensive to solve numerically.
+Accurate solutions require fine resolution across all these domains, leading to significant challenges in terms of memory and computing time, particularly in multi-dimensional or time-dependent simulations.
+
+Unfortunately, numerical methods often suffer from high computational costs, dimensionality issues, or instability
+while traditional deep learning approaches often struggle with generalization across discretizations and parameter settings, 
+as well as stability in high-dimensional PDE problems. 
+
+To address these shortcomings, we employ Neural Operators, to develop surrogate models for simulating radiative transfer. We present two Neural Operator–based surrogate models for three-dimensional radiative transfer, achieving significant speedups while maintaining high accuracy.
+
+We employ a specific class of Neural Operators known as the Fourier Neural Operator (FNO) and combines it with a U-Net architecture, following the approach chosen in this paper[CITE]. 
+
+FIGURE VON UFNO HIERHIN
+
+
+We developed two UFNO-based surrogate models for the simulation of three-dimensional radiative transfer. The first model enables time-independent predictions of radiative intensity in the steady -state limit, while the second model allows to model the temporal evolution of radiative intensity via recurrent application across time steps. Both models were implemented in JAX.
+
 ## Installation
 
 To clone the git:
@@ -26,19 +46,31 @@ sourcen + wie an dataset kommen (Describe how to set up the environment, e.g. pi
 
 ## Training
 
-In our paper we consider two scenarios in which we want to emulate Radiative Transfer. ....
+In our paper we consider two scenarios in which we want to emulate Radiative Transfer. For each scenario we provide code to train a surrogate model, as well as pretrained surrogate models. 
+1. Prediction of steady-state radiative intensity setting in for $t \to \infty$ 
+2. Temporal evolution of radiative intensity from a starting point where $I_0=0$
+
+To train the steady-state model we provide a dataset consisting of samples, that each comprising an absorption and emission field as well as the corresponding steady-state radiative intensity. These are generated using the code from here[cite].
 
 To train the steady-state model, run this command:
 
 ```train
-python train.py --input-data <path_to_data> --alpha 10 --beta 20
+python train_3d.py 
 ```
 
-To train the steady-state model, run this command:
+In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or load different datafiles. Alternatively you can load our pretrained model ```ufno_3d.eqx``` from the 'surrogate_models' folder.
+
+
+
+To train the model for the temporal evolution we provide a dataset consisting of samples, that each comprising an absorption and emission field as well as the corresponding steady-state radiative intensity. These are also generated using the code from here[cite]. 
+To train the model for the temporal evolution, run this command:
 
 ```train
-python train.py --input-data <path_to_data> --alpha 10 --beta 20
+python train_3d_time.py 
 ```
+
+In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or load different datafiles. Alternatively you can load our pretrained model ```ufno_3d_time.eqx``` from the 'surrogate_models' folder.
+CHANGE THIS DEPENDING ON IF I STORE THE SPLITTED FILES OR THE ORIGINAL FILE OR MAYBE JUST BOTH
 
 sagen, was in beiden Dateien vohanden, etc. was man verstellen kann, sagen, dass auf die in architectures (link hinterlegen) defineirten architekturen zugreifen, Optuna etc
 
@@ -70,15 +102,44 @@ You can download pretrained models here:
 
 ## Results
 
-Following plots show a comparison of the predictions of surrogate models and numerical reference for a random sample from the test set
+Following plots show a comparison of the predictions of surrogate models and numerical reference for a random sample from the test set.
 
-Our model achieves the following performance on :
+Emulating radiative transfer in the steady-state case:
 
-### [Image Classification on ImageNet](https://paperswithcode.com/sota/image-classification-on-imagenet)
+FIG 2 einfügen
 
-| Model name         | Top 1 Accuracy  | Top 5 Accuracy |
-| ------------------ |---------------- | -------------- |
-| My awesome model   |     85%         |      95%       |
+Emulating radiative transfer in the temporal evolution case:
+
+FIG 3 einfügen
+
+
+Our model achieves the following performance on the test set:
+
+| Model name           | MSE             | Absolute relative error |
+| ------------------ --|---------------- | ------------------------|
+| Steady-State Model   |     X           |      0.5%               |
+| Recurrent Model      |     Y           |      Y%                 |
+
+
+Optimal hyperparameters for the steady-state model and its training:
+
+| Model hyperparameters                  | Training hyperparameters |            | 
+| ---------------------------------------| --------------------------------------|
+| Number of Layers     |     X           | Initial Learning Rate    |     X      | 
+| Width                |     Y           | Decay Rate               |     X      | 
+| Modes                |     X           | Weight Decay             |     X      | 
+| Kernel Size          |     X           | Dropout Probability      |     X      |  
+| U-Net Width          |     X           | $\lambda$ in Loss        |     X      | 
+
+Optimal hyperparameters for the recurrent model and its training:
+
+| Model hyperparameters                  | Training hyperparameters |            | 
+| ---------------------------------------| --------------------------------------|
+| Number of Layers     |     X           | Initial Learning Rate    |     X      | 
+| Width                |     Y           | Decay Rate               |     X      | 
+| Modes                |     X           | Weight Decay             |     X      | 
+| Kernel Size          |     X           | Dropout Probability      |     X      |  
+| U-Net Width          |     X           | $\lambda$ in Loss        |     X      | 
 
 >📋  Include a table of results from your paper, and link back to the leaderboard for clarity and context. If your main result is a figure, include that figure and link to the command or notebook to reproduce it. -> d.h. ich sollte evaluate vermutlich drinhaben, aber da einfach nur plots mit model machen bzw vllt nochmal test loss
 
