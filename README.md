@@ -6,7 +6,7 @@ This repository is the official implementation of [Emulating Radiative Transfer 
 
 Radiative transfer - cornerstone - ... - gifs und plots die einfach Vorhersage zeigen, Ergebnisplots dann unten
 
-![Alt-Text](plots/pred.gif)
+ HIER 3D GIF oder static von Radiative intensity einfügen
 
 
 Radiative transfer is a cornerstone of computational astrophysics, providing the essential link between physical models and observational diagnostics. Simulating the propagation of radiation through astrophysical media, such as stellar atmospheres, interstellar clouds, or galaxy clusters, requires solving the radiative transfer equation (RTE). 
@@ -106,12 +106,17 @@ Following plots show a comparison of the predictions of surrogate models and num
 
 Emulating radiative transfer in the steady-state case:
 
-![Alt-Text](plots/neurips_3d_XY_plane.gif)
+
+<p align="center">
+  <img src="plots/neurips_3d_XY_plane.png" alt="ABCDE" width="500">
+</p>
 
 Emulating radiative transfer in the temporal evolution case:
 
-![Alt-Text](plots/pred.gif)
-![Alt-Text](plots/true.gif)
+<p align="center">
+  <img src="plots/pred.gif" alt="ABCDE" width="500">
+  <img src="plots/true.gif" alt="ABCDE" width="500">
+</p>
 
 
 Our model achieves the following performance on the test set:
