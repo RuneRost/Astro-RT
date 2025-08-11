@@ -8,6 +8,10 @@ Radiative transfer - cornerstone - ... - gifs und plots die einfach Vorhersage z
 
  HIER 3D GIF oder static von Radiative intensity einfügen
 
+<p align="center">
+  <img src="plots/placeholder.png" alt="ABCDE" width="500">
+</p>
+
 
 Radiative transfer is a cornerstone of computational astrophysics, providing the essential link between physical models and observational diagnostics. Simulating the propagation of radiation through astrophysical media, such as stellar atmospheres, interstellar clouds, or galaxy clusters, requires solving the radiative transfer equation (RTE). 
 Due to its high dimensionality (dependence on time $t$, spatial position $x$, direction $\omega$, and frequency $\nu$) the RTE is highly complex and computationally expensive to solve numerically.
