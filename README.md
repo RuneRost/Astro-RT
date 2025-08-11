@@ -114,8 +114,8 @@ Emulating radiative transfer in the steady-state case:
 Emulating radiative transfer in the temporal evolution case:
 
 <p align="center">
-  <img src="plots/pred.gif" alt="ABCDE" width="500">
-  <img src="plots/true.gif" alt="ABCDE" width="500">
+  <img src="plots/pred.gif" alt="ABCDE" width="200">
+  <img src="plots/true.gif" alt="ABCDE" width="200">
 </p>
 
 
