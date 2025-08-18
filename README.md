@@ -55,7 +55,7 @@ python train_3d.py
 ```
 
 In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below.
-If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as [`ufno_3d.eqx`](surrogate_models/ufno_3d.eqx) in the []`surrogate_models`](surrogate_models) folder.
+If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d.eqx` in the [`surrogate_models`](surrogate_models) folder.
 
 
 
@@ -67,7 +67,7 @@ python train_3d_time.py
 ```
 
 In this script an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below.
-If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as [`ufno_3d_time.eqx`](surrogate_models/ufno_3d_time.eqx) in the [`surrogate_models`](surrogate_models) folder.
+If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d_time.eqx` in the [`surrogate_models`](surrogate_models) folder.
 
 Both architectures are build following the approach in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697).
 
@@ -89,8 +89,8 @@ python eval.py --model-file mymodel.pth --benchmark imagenet
 
 As mentioned above, the two pre-trained surrogate models we present in our paper can be found in the folder [`surrogate_models`](surrogate_models).
 
-- [`ufno_3d.eqx`](surrogate_models/ufno_3d.eqx) is the surrogate models for predicting the steady-state radiative intensity. It receives an absoprtion and emission field as input and predicts the stead state radiative intensity setting in for $t \to \infty$
-- [`ufno_3d_time.eqx`](surrogate_models/ufno_3d_time.eqx) is the surrogate models for predicting the temporal evolution of the radiative intensity.  It receives an absoprtion and emission field together with an radiative intensity (at time t) field as input and predicts the radiative intensity at time t+1. Full temporal evolution is obtained by recursively feeding predictions back as input.
+- `ufno_3d.eqx` is the surrogate models for predicting the steady-state radiative intensity. It receives an absoprtion and emission field as input and predicts the stead state radiative intensity setting in for $t \to \infty$
+- `ufno_3d_time.eqx` is the surrogate models for predicting the temporal evolution of the radiative intensity.  It receives an absoprtion and emission field together with an radiative intensity (at time t) field as input and predicts the radiative intensity at time t+1. Full temporal evolution is obtained by recursively feeding predictions back as input.
 
 ## Results
 
