@@ -9,14 +9,14 @@ This repository contains the code accompanying the paper *Emulating Radiative Tr
 </p>
 
 
-Radiative transfer is a cornerstone of computational astrophysics, providing the essential link between physical models and observational diagnostics. Simulating the propagation of radiation requires solving the radiative transfer equation (RTE), which, due to its high dimensionality, is computationally expensive to solve numerically [Buck et al., 2017]{https://arxiv.org/abs/1612.05277}.
+Radiative transfer is a cornerstone of computational astrophysics, providing the essential link between physical models and observational diagnostics. Simulating the propagation of radiation requires solving the radiative transfer equation (RTE), which, due to its high dimensionality, is computationally expensive to solve numerically [Buck et al., 2017](https://arxiv.org/abs/1612.05277).
 Accurate solutions require fine resolution, leading to significant challenges in terms of memory and computing time, particularly in multi-dimensional or time-dependent simulations.
 Proposed numerical methods often suffer from high computational costs, dimensionality issues, or instability
 while traditional deep learning approaches often struggle with generalization across discretizations and parameter settings, 
 as well as stability in high-dimensional PDE problems. 
 
 To address these shortcomings, we employ Neural Operators, to develop surrogate models for simulating radiative transfer. We present two Neural Operator–based surrogate models for three-dimensional radiative transfer, achieving significant speedups while maintaining high accuracy.
-We employ a specific class of Neural Operators known as the [Fourier Neural Operator]{https://arxiv.org/abs/2010.08895} (FNO) and combines it with a [U-Net]{https://arxiv.org/abs/1505.04597} architecture, following the approach chosen in [Gege Wen et al., 2022]{https://arxiv.org/abs/2109.03697}. 
+We employ a specific class of Neural Operators known as the [Fourier Neural Operator](https://arxiv.org/abs/2010.08895) (FNO) and combines it with a [U-Net](https://arxiv.org/abs/1505.04597) architecture, following the approach chosen in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697). 
 
 <p align="center">
   <img src="plots/UFNO-Fig.png" alt=" " width="1000">
