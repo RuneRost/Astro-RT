@@ -1,15 +1,11 @@
 # Emulating Radiative Transfer in Astrophysical Environments
 
-This repository is the official implementation of [Emulating Radiative Transfer in Astrophysical Environments](https://arxiv.org/abs/2030.12345). 
-
->📋  Optional: include a graphic explaining your approach/main result, bibtex entry, link to demos, blog posts and tutorials
-
-Radiative transfer - cornerstone - ... - gifs und plots die einfach Vorhersage zeigen, Ergebnisplots dann unten
+This repository contains the code accompanying the paper *Emulating Radiative Transfer in Astrophysical Environments*. 
 
  HIER 3D GIF oder static von Radiative intensity einfügen
 
 <p align="center">
-  <img src="plots/placeholder.png" alt="ABCDE" width="500">
+  <img src="plots/UFNO-Fig.pdf" alt=" " width="500">
 </p>
 
 
@@ -22,7 +18,6 @@ while traditional deep learning approaches often struggle with generalization ac
 as well as stability in high-dimensional PDE problems. 
 
 To address these shortcomings, we employ Neural Operators, to develop surrogate models for simulating radiative transfer. We present two Neural Operator–based surrogate models for three-dimensional radiative transfer, achieving significant speedups while maintaining high accuracy.
-
 We employ a specific class of Neural Operators known as the Fourier Neural Operator (FNO) and combines it with a U-Net architecture, following the approach chosen in this paper[CITE]. 
 
 FIGURE VON UFNO HIERHIN
@@ -32,18 +27,21 @@ We developed two UFNO-based surrogate models for the simulation of three-dimensi
 
 ## Installation
 
-To clone the git:
+To clone this git use the following command:
 
 ```bash
 git clone https://github.com/your-anonymous-id/Astro_RT.git
 cd Astro_RT
 ```
 
-To install requirements:
+To directly install all requirements necessary to run the codes in this git use the following command:
 
 ```bash
 pip install -r requirements.txt
 ```
+
+The following sections give a detailled description on how to train surrogate models for steady-state radiative intensity predictions sing `train_3d.py`` and for temporal evolution of radiative intensity using `train_3d_time.py`. Furthermore, we provide two pretrained surrogate models, which can directly be used for evluation.
+
 
 sourcen + wie an dataset kommen (Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc...)
 
@@ -73,7 +71,7 @@ To train the model for the temporal evolution, run this command:
 python train_3d_time.py 
 ```
 
-In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or load different datafiles. Alternatively you can load our pretrained model ```ufno_3d_time.eqx``` from the 'surrogate_models' folder.
+In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or load different datafiles. Alternatively you can load our pretrained model `ufno_3d_time.eqx` from the `surrogate_models`` folder.
 CHANGE THIS DEPENDING ON IF I STORE THE SPLITTED FILES OR THE ORIGINAL FILE OR MAYBE JUST BOTH
 
 sagen, was in beiden Dateien vohanden, etc. was man verstellen kann, sagen, dass auf die in architectures (link hinterlegen) defineirten architekturen zugreifen, Optuna etc
@@ -114,6 +112,7 @@ Emulating radiative transfer in the steady-state case:
 <p align="center">
   <img src="plots/neurips_3d_XY_plane.png" alt="ABCDE" width="500">
 </p>
+plots auf unpreprocessed ändern
 
 Emulating radiative transfer in the temporal evolution case:
 
