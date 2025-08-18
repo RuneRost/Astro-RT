@@ -40,13 +40,13 @@ To directly install all requirements necessary to run the codes in this git use 
 pip install -r requirements.txt
 ```
 
-## Training
+## Training & Evaluation
 
 In our paper we consider two scenarios in which we want to emulate Radiative Transfer. For each scenario we provide code to train a surrogate model, as well as our pretrained surrogate model. The two scenarios for which we trained our models are:
 1. Prediction of steady-state radiative intensity setting in for $t \to \infty$ 
 2. Temporal evolution of radiative intensity from a starting point where $I_0=0$
 
-To train the steady-state model we provide a dataset consisting of samples, that each comprise an absorption and emission field as well as the corresponding steady-state radiative intensity. These are generated using the code from [here](https://github.com/lorenzobranca/Ray-trax).
+To train and evaluate the steady-state model we provide a dataset consisting of samples, that each comprise an absorption and emission field as well as the corresponding steady-state radiative intensity. These are generated using the code from [here](https://github.com/lorenzobranca/Ray-trax).
 
 To train the steady-state model, run this command:
 
@@ -54,36 +54,46 @@ To train the steady-state model, run this command:
 python train_3d.py 
 ```
 
-In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below.
-If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d.eqx` in the [`surrogate_models`](surrogate_models) folder.
+In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below. During training the performance of the model on the validation set is assessed and after training predictions are made on the test set to evaluate the quality of the model.
+If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d.eqx` in the [`surrogate_models`](surrogate_models) folder. In this case you can comment out the training part (or simply set the number of trained epochs to 0)
 
 
 
-To train the model for the temporal evolution we provide a training, validation and test set, each consisting of samples, that comprise an absorption and emission field as well as two consectuive snapshots of the temporal evolution of the corresponding radiative intensity. Thee samples were also generated using the code from [here](https://github.com/lorenzobranca/Ray-trax) and further split into training, validation and test set using the code that is currently commented out at the end of the file. 
+To train and evaluate the model for the temporal evolution we provide a training, validation and test set, each consisting of samples, that comprise an absorption and emission field as well as two consectuive snapshots of the temporal evolution of the corresponding radiative intensity. Thee samples were also generated using the code from [here](https://github.com/lorenzobranca/Ray-trax) and further split into training, validation and test set using the code that is currently commented out at the end of the file. 
 To train the model for the temporal evolution, run this command:
 
 ```train
 python train_3d_time.py 
 ```
 
-In this script an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below.
-If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d_time.eqx` in the [`surrogate_models`](surrogate_models) folder.
+In this script an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below. During training the performance of the model on the validation set is assessed and after training predictions are made on the test set to evaluate the quality of the model.
+If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d_time.eqx` in the [`surrogate_models`](surrogate_models) folder. In this case you can comment out the training part (or simply set the number of trained epochs to 0)
 
 Both architectures are build following the approach in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697).
 
 CHANGE THIS DEPENDING ON IF I STORE THE SPLITTED FILES OR THE ORIGINAL FILE OR MAYBE JUST BOTH
 
 
-## Evaluation
--> soll ich das extra machen, wenn ja dann bei git auch evaluate.py hinzufügen
+Optimal hyperparameters for the steady-state model and its training:
 
-To evaluate my model on ImageNet, run:
+| Model hyperparameters | Value          | Training hyperparameters   | Value      | 
+|-----------------------|----------------|----------------------------|------------|
+| Number of Layers      |    6           |   Initial Learning Rate    |   0.0011   | 
+| Layer Width           |    16          |   Decay Rate               |   0.9032   | 
+| Number of Modes       |    4           |   Weight Decay             |   0.0003   | 
+| U-Net Kernel Size     |    3           |   Dropout Probability      |   0.07     |  
+| U-Net Width           |    16          |   $\lambda$ in Loss        |   0.5      | 
 
-```eval
-python eval.py --model-file mymodel.pth --benchmark imagenet
-```
+Optimal hyperparameters for the recurrent model and its training:
 
->📋  Describe how to evaluate the trained models on benchmarks reported in the paper, give commands that produce the results (section below).
+| Model hyperparameters | Value          | Training hyperparameters   | Value      | 
+|-----------------------|----------------|----------------------------|------------|
+| Number of Layers      |    6           |   Initial Learning Rate    |   0.0007   | 
+| Layer Width           |    16          |   Decay Rate               |   0.9120   | 
+| Number of Modes       |    4           |   Weight Decay             |   0.0052   | 
+| U-Net Kernel Size     |    2           |   Dropout Probability      |   0.08     |  
+| U-Net Width           |    16          |   $\lambda$ in Loss        |   0.5      | 
+
 
 ## Pre-trained Models
 
@@ -92,57 +102,43 @@ As mentioned above, the two pre-trained surrogate models we present in our paper
 - `ufno_3d.eqx` is the surrogate models for predicting the steady-state radiative intensity. It receives an absoprtion and emission field as input and predicts the stead state radiative intensity setting in for $t \to \infty$
 - `ufno_3d_time.eqx` is the surrogate models for predicting the temporal evolution of the radiative intensity.  It receives an absoprtion and emission field together with an radiative intensity (at time t) field as input and predicts the radiative intensity at time t+1. Full temporal evolution is obtained by recursively feeding predictions back as input.
 
+In the code for training (and evaluation) you can change the input files to assess the performance of these models on different data. 
+
 ## Results
 
-Following plots show a comparison of the predictions of surrogate models and numerical reference for a random sample from the test set.
+Following plots show a comparison of the predictions of our surrogate models and the preprocessed numerically computed reference, respectively for a random sample from the test set.
 
-Emulating radiative transfer in the steady-state case:
-
+Results for emulating radiative transfer in the steady-state case:
 
 <p align="center">
   <img src="plots/neurips_3d_XY_plane.png" alt="ABCDE" width="500">
 </p>
-plots auf unpreprocessed ändern
+
+The predicted intensity field closely matches the numerical reference, preserving fine-scale structures. Residuals remain consistently low, with only a few exceptions, primarily near discontinuities.
+
+
+
 
 Emulating radiative transfer in the temporal evolution case:
 
 <p align="center">
-  <img src="plots/pred.gif" alt="ABCDE" width="200">
-  <img src="plots/true.gif" alt="ABCDE" width="200">
+  <img src="plots/pred.gif" alt="ABCDE" width="150">
+  <img src="plots/true.gif" alt="ABCDE" width="150">
+  <img src="plots/true.gif" alt="ABCDE" width="150">
 </p>
 
+The recurrent surrogate model accurately captures the temporal evolution of radiative intensity, with predictions closely matching reference solutions at each time step. Residuals remain low, with deviations mainly near edges around evolving structures. 
 
-Our model achieves the following performance on the test set:
 
-| Model name           | MSE             | Absolute relative error |
+The following summarizes the performance of our models on the test set:
+
+| Model name           | Speedup         | Absolute relative error |
 |----------------------|-----------------|-------------------------|
-| Steady-State Model   |     X           |      0.5%               |
-| Recurrent Model      |     Y           |      Y%                 |
+| Steady-State Model   |     200x        |      2.4%               |
+| Recurrent Model      |     160x        |      3.7%               |
 
 
-Optimal hyperparameters for the steady-state model and its training:
-
-| Model hyperparameters | Value           | Training hyperparameters | Value      | 
-|-----------------------|-----------------|--------------------------|------------|
-| Number of Layers      |     X           | Initial Learning Rate    |     X      | 
-| Width                 |     Y           | Decay Rate               |     X      | 
-| Modes                 |     X           | Weight Decay             |     X      | 
-| Kernel Size           |     X           | Dropout Probability      |     X      |  
-| U-Net Width           |     X           | $\lambda$ in Loss        |     X      | 
-
-Optimal hyperparameters for the recurrent model and its training:
-
-| Model hyperparameters | Value           | Training hyperparameters | Value      | 
-|-----------------------|-----------------|--------------------------|------------|
-| Number of Layers      |     X           | Initial Learning Rate    |     X      | 
-| Width                 |     Y           | Decay Rate               |     X      | 
-| Modes                 |     X           | Weight Decay             |     X      | 
-| Kernel Size           |     X           | Dropout Probability      |     X      |  
-| U-Net Width           |     X           | $\lambda$ in Loss        |     X      | 
-
->📋  Include a table of results from your paper, and link back to the leaderboard for clarity and context. If your main result is a figure, include that figure and link to the command or notebook to reproduce it. -> d.h. ich sollte evaluate vermutlich drinhaben, aber da einfach nur plots mit model machen bzw vllt nochmal test loss
-
-Tabelle mit accuracy relativ und mse vllt machen für beide models, vllt auch hyperparameter
+The models achieves a speedup of more than 2 orders of magnitude while maintaining an average relative error below 4%. Additional results and analysis can be found in the appendix of the Paper.
 
 
 ## Contributing
@@ -152,3 +148,5 @@ Tabelle mit accuracy relativ und mse vllt machen für beide models, vllt auch hy
 
 Todo:
 bei architecturen nochmal die Referenz von ufno citen - also vllt link noch in beide files rein
+passt es, dass evaluation bei training dabei?
+in train datei, bei printen von loss sagen, welcher
