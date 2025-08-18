@@ -9,7 +9,7 @@ This repository contains the code accompanying the paper *Emulating Radiative Tr
 </p>
 
 
-Radiative transfer is a cornerstone of computational astrophysics, providing the essential link between physical models and observational diagnostics. Simulating the propagation of radiation requires solving the radiative transfer equation (RTE), which, due to its high dimensionality, is computationally expensive to solve numerically [Buck et al., 2017](https://arxiv.org/abs/1612.05277).
+Radiative transfer is a cornerstone of computational astrophysics, providing the essential link between physical models and observational diagnostics. Simulating the propagation of radiation requires solving the radiative transfer equation (RTE), which, due to its high dimensionality, is computationally expensive to solve numerically ([Buck et al., 2017](https://arxiv.org/abs/1612.05277)).
 Accurate solutions require fine resolution, leading to significant challenges in terms of memory and computing time, particularly in multi-dimensional or time-dependent simulations.
 Proposed numerical methods often suffer from high computational costs, dimensionality issues, or instability
 while traditional deep learning approaches often struggle with generalization across discretizations and parameter settings, 
@@ -40,19 +40,13 @@ To directly install all requirements necessary to run the codes in this git use 
 pip install -r requirements.txt
 ```
 
-The following sections give a detailled description on how to train surrogate models for steady-state radiative intensity predictions sing `train_3d.py`` and for temporal evolution of radiative intensity using `train_3d_time.py`. Furthermore, we provide two pretrained surrogate models, which can directly be used for evluation.
-
-
-sourcen + wie an dataset kommen (Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc...)
-
-
 ## Training
 
-In our paper we consider two scenarios in which we want to emulate Radiative Transfer. For each scenario we provide code to train a surrogate model, as well as pretrained surrogate models. 
+In our paper we consider two scenarios in which we want to emulate Radiative Transfer. For each scenario we provide code to train a surrogate model, as well as our pretrained surrogate model. The two scenarios for which we trained our models are:
 1. Prediction of steady-state radiative intensity setting in for $t \to \infty$ 
 2. Temporal evolution of radiative intensity from a starting point where $I_0=0$
 
-To train the steady-state model we provide a dataset consisting of samples, that each comprising an absorption and emission field as well as the corresponding steady-state radiative intensity. These are generated using the code from here[cite].
+To train the steady-state model we provide a dataset consisting of samples, that each comprise an absorption and emission field as well as the corresponding steady-state radiative intensity. These are generated using the code from [here](https://github.com/lorenzobranca/Ray-trax).
 
 To train the steady-state model, run this command:
 
@@ -60,25 +54,25 @@ To train the steady-state model, run this command:
 python train_3d.py 
 ```
 
-In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or load different datafiles. Alternatively you can load our pretrained model ```ufno_3d.eqx``` from the 'surrogate_models' folder.
+In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below.
+If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as [`ufno_3d.eqx`](surrogate_models/ufno_3d.eqx) in the []`surrogate_models`](surrogate_models) folder.
 
 
 
-To train the model for the temporal evolution we provide a dataset consisting of samples, that each comprising an absorption and emission field as well as the corresponding steady-state radiative intensity. These are also generated using the code from here[cite]. 
+To train the model for the temporal evolution we provide a training, validation and test set, each consisting of samples, that comprise an absorption and emission field as well as two consectuive snapshots of the temporal evolution of the corresponding radiative intensity. Thee samples were also generated using the code from [here](https://github.com/lorenzobranca/Ray-trax) and further split into training, validation and test set using the code that is currently commented out at the end of the file. 
 To train the model for the temporal evolution, run this command:
 
 ```train
 python train_3d_time.py 
 ```
 
-In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or load different datafiles. Alternatively you can load our pretrained model `ufno_3d_time.eqx` from the `surrogate_models`` folder.
+In this script an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below.
+If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as [`ufno_3d_time.eqx`](surrogate_models/ufno_3d_time.eqx) in the [`surrogate_models`](surrogate_models) folder.
+
+Both architectures are build following the approach in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697).
+
 CHANGE THIS DEPENDING ON IF I STORE THE SPLITTED FILES OR THE ORIGINAL FILE OR MAYBE JUST BOTH
 
-sagen, was in beiden Dateien vohanden, etc. was man verstellen kann, sagen, dass auf die in architectures (link hinterlegen) defineirten architekturen zugreifen, Optuna etc
-
-bei architecturen nochmal die Referenz von ufno citen
-
->📋  Describe how to train the models, with example commands on how to train the models in your paper, including the full training procedure and appropriate hyperparameters.
 
 ## Evaluation
 -> soll ich das extra machen, wenn ja dann bei git auch evaluate.py hinzufügen
@@ -93,14 +87,10 @@ python eval.py --model-file mymodel.pth --benchmark imagenet
 
 ## Pre-trained Models
 
-The two pre-trained models we present in our paper can be found in the folder surrogate models (mit link hinterlegen).
-ufno_3d.eqx (hinterlegen) und ufno_3d_time.eqx (hinterlegen vorstellen)
+As mentioned above, the two pre-trained surrogate models we present in our paper can be found in the folder [`surrogate_models`](surrogate_models).
 
-You can download pretrained models here:
-
-- [My awesome model](https://drive.google.com/mymodel.pth) trained on ImageNet using parameters x,y,z. 
-
->📋  Give a link to where/how the pretrained models can be downloaded and how they were trained (if applicable).  Alternatively you can have an additional column in your results table with a link to the models.
+- [`ufno_3d.eqx`](surrogate_models/ufno_3d.eqx) is the surrogate models for predicting the steady-state radiative intensity. It receives an absoprtion and emission field as input and predicts the stead state radiative intensity setting in for $t \to \infty$
+- [`ufno_3d_time.eqx`](surrogate_models/ufno_3d_time.eqx) is the surrogate models for predicting the temporal evolution of the radiative intensity.  It receives an absoprtion and emission field together with an radiative intensity (at time t) field as input and predicts the radiative intensity at time t+1. Full temporal evolution is obtained by recursively feeding predictions back as input.
 
 ## Results
 
@@ -158,3 +148,7 @@ Tabelle mit accuracy relativ und mse vllt machen für beide models, vllt auch hy
 ## Contributing
 
 >📋  Pick a licence and describe how to contribute to your code repository. 
+
+
+Todo:
+bei architecturen nochmal die Referenz von ufno citen - also vllt link noch in beide files rein
