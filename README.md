@@ -21,7 +21,7 @@ To address these shortcomings, we employ Neural Operators, to develop surrogate 
 We employ a specific class of Neural Operators known as the Fourier Neural Operator (FNO) and combines it with a U-Net architecture, following the approach chosen in this paper[CITE]. 
 
 <p align="center">
-  <img src="plots/UFNO-Fig.pdf" alt=" " width="500">
+  <img src="plots/UFNO-Fig.png" alt=" " width="500">
 </p>
 
 
