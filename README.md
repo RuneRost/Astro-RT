@@ -5,7 +5,7 @@ This repository contains the code accompanying the paper *Emulating Radiative Tr
  HIER 3D GIF oder static von Radiative intensity einfügen
 
 <p align="center">
-  <img src="plots/UFNO-Fig.pdf" alt=" " width="500">
+  <img src="plots/placeholder.png" alt=" " width="500">
 </p>
 
 
@@ -20,7 +20,9 @@ as well as stability in high-dimensional PDE problems.
 To address these shortcomings, we employ Neural Operators, to develop surrogate models for simulating radiative transfer. We present two Neural Operator–based surrogate models for three-dimensional radiative transfer, achieving significant speedups while maintaining high accuracy.
 We employ a specific class of Neural Operators known as the Fourier Neural Operator (FNO) and combines it with a U-Net architecture, following the approach chosen in this paper[CITE]. 
 
-FIGURE VON UFNO HIERHIN
+<p align="center">
+  <img src="plots/UFNO-Fig.pdf" alt=" " width="500">
+</p>
 
 
 We developed two UFNO-based surrogate models for the simulation of three-dimensional radiative transfer. The first model enables time-independent predictions of radiative intensity in the steady -state limit, while the second model allows to model the temporal evolution of radiative intensity via recurrent application across time steps. Both models were implemented in JAX.
