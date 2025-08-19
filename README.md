@@ -99,7 +99,7 @@ Optimal hyperparameters for the recurrent model and its training:
 As mentioned above, the two pre-trained surrogate models we present in our paper can be found in the folder [`surrogate_models`](surrogate_models).
 
 - `ufno_3d.eqx` is the surrogate models for predicting the steady-state radiative intensity. It receives an absoprtion and emission field as input and predicts the stead state radiative intensity setting in for $t \to \infty$
-- `ufno_3d_time.eqx` is the surrogate models for predicting the temporal evolution of the radiative intensity.  It receives an absoprtion and emission field together with an radiative intensity (at time t) field as input and predicts the radiative intensity at time t+1. Full temporal evolution is obtained by recursively feeding predictions back as input.
+- `ufno_3d_time.eqx` is the surrogate models for predicting the temporal evolution of the radiative intensity.  It receives an absoprtion and emission field together with an radiative intensity (at time t) field as input and predicts the radiative intensity at time t+1 (thus deviating slightly from the configuration shown in the figure describing the architecture). Full temporal evolution is obtained by recursively feeding predictions back as input.
 
 In the code for training (and evaluation) you can change the input files to assess the performance of these models on different data. 
 
@@ -155,5 +155,6 @@ Todo:
 - bei architecturen nochmal die Referenz von ufno citen - also vllt link noch in beide files rein
 - passt es, dass evaluation bei training dabei?
 - in train datei, bei printen von loss sagen, welcher
+- vllt in train extra-fkt für evaluation also statt in der optuna-study
 - License hier in readme
 - Lorenzos git richtig citen
