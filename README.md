@@ -138,8 +138,8 @@ The following summarizes the performance of our models on the test set:
 
 | Model name           | Speedup         | Absolute relative error |
 |----------------------|-----------------|-------------------------|
-| Steady-State Model   |     200x        |      2.4%               |
-| Recurrent Model      |     160x        |      3.7%               |
+| Steady-State Model   |     ~200x       |      2.4%               |
+| Recurrent Model      |     ~160x       |      3.7%               |
 
 
 The models achieves a speedup of more than 2 orders of magnitude while maintaining an average relative error below 4%. Additional results and analysis can be found in the appendix of the Paper.
@@ -156,3 +156,4 @@ Todo:
 - passt es, dass evaluation bei training dabei?
 - in train datei, bei printen von loss sagen, welcher
 - License hier in readme
+- Lorenzos git richtig citen
