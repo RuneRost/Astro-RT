@@ -5,7 +5,7 @@ This repository contains the code accompanying the paper *Emulating Radiative Tr
  HIER 3D GIF oder static von Radiative intensity einfügen
 
 <p align="center">
-  <img src="plots/placeholder.png" alt=" " width="250">
+  <img src="plots/pred_3d.gif" alt=" " width="250">
 </p>
 
 
@@ -110,6 +110,8 @@ Following plots show a comparison of the predictions of our surrogate models and
 
 Results for emulating radiative transfer in the steady-state case:
 
+The following plot shows the preprocessed numerically computed steady-state radiative intensity (left), the model prediction (middle) and the corresponding residual (right), for a random sample from the test set.
+
 <p align="center">
   <img src="plots/neurips_3d_XY_plane.png" alt="ABCDE" width="500">
 </p>
@@ -121,10 +123,13 @@ The predicted intensity field closely matches the numerical reference, preservin
 
 Emulating radiative transfer in the temporal evolution case:
 
+The following plot shows the temporal evolution of radiative intensity for a random sample from the test set, including the  preprocessed
+numerical reference (left), model prediction (middle), and corresponding residual (left). In the paper we show snapshots at selected timesteps of this evolution.
+
 <p align="center">
-  <img src="plots/pred.gif" alt="ABCDE" width="150">
-  <img src="plots/true.gif" alt="ABCDE" width="150">
-  <img src="plots/true.gif" alt="ABCDE" width="150">
+  <img src="plots/true_XY.gif" alt="ABCDE" width="150">
+  <img src="plots/pred_XY.gif" alt="ABCDE" width="150">
+  <img src="plots/res_XY.gif" alt="ABCDE" width="150">
 </p>
 
 The recurrent surrogate model accurately captures the temporal evolution of radiative intensity, with predictions closely matching reference solutions at each time step. Residuals remain low, with deviations mainly near edges around evolving structures. 
