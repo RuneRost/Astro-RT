@@ -2,7 +2,6 @@
 
 This repository contains the code accompanying the paper *Emulating Radiative Transfer in Astrophysical Environments*. 
 
- HIER 3D GIF oder static von Radiative intensity einfügen
 
 <p align="center">
   <img src="plots/pred_3d.gif" alt=" " width="250">
@@ -152,6 +151,8 @@ The models achieves a speedup of more than 2 orders of magnitude while maintaini
 
 
 Todo:
-bei architecturen nochmal die Referenz von ufno citen - also vllt link noch in beide files rein
-passt es, dass evaluation bei training dabei?
-in train datei, bei printen von loss sagen, welcher
+- requirements ergänzen
+- bei architecturen nochmal die Referenz von ufno citen - also vllt link noch in beide files rein
+- passt es, dass evaluation bei training dabei?
+- in train datei, bei printen von loss sagen, welcher
+- License hier in readme
