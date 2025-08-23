@@ -153,21 +153,6 @@ class UFNO3d(eqx.Module):
     spectral_convs: list[SpectralConv3d]
     bypass_convs: list[eqx.nn.Conv1d]
     unets: list[U_net]
-    #conv0: SpectralConv3d
-    #conv1: SpectralConv3d
-    #conv2: SpectralConv3d
-    #conv3: SpectralConv3d
-    #conv4: SpectralConv3d
-    #conv5: SpectralConv3d
-    #w0: eqx.nn.Conv1d
-    #w1: eqx.nn.Conv1d
-    #w2: eqx.nn.Conv1d
-    #w3: eqx.nn.Conv1d
-    #w4: eqx.nn.Conv1d
-    #w5: eqx.nn.Conv1d
-    #unet3: U_net
-    #unet4: U_net
-    #unet5: U_net
 
     def __init__(self, in_channels:int, out_channels:int, num_layers: int, modes_x: int, modes_y: int, modes_z: int, width: int, p_do: float, *, key):
         self.in_channels = in_channels
@@ -190,27 +175,7 @@ class UFNO3d(eqx.Module):
             self.spectral_convs.append(SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=key1)) 
             self.bypass_convs.append(eqx.nn.Conv1d(width, width, kernel_size=1, key=key2))
             self.unets.append(U_net(width, width, 3, p_do, key=key3))
-        
-        #self.fc0   = eqx.nn.Linear(self.in_channels, width, key=keys[0])  
-        #self.conv0 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[1])
-        #self.conv1 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[2])
-        #self.conv2 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[3])
-        #self.conv3 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[4])
-        #self.conv4 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[5])
-        #self.conv5 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[6])
-        #self.w0 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[7])
-        #self.w1 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[8])
-        #self.w2 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[9])
-        #self.w3 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[10])
-        #self.w4 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[11])
-        #self.w5 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[12])
-        #self.unet3 = U_net(width, width, 3, p_do, key=keys[13])  
-        #self.unet4 = U_net(width, width, 3, p_do, key=keys[14])  
-        #self.unet5 = U_net(width, width, 3, p_do, key=keys[15])  
-        #self.fc1 = eqx.nn.Linear(width, 1024, key=keys[16])   
-        #self.fc2 = eqx.nn.Linear(1024, self.out_channels, key=keys[17]) 
     
-
     def __call__(self, x, key=None, deterministic=False):
         channels, spatial_points_x, spatial_points_y, spatial_points_z = x.shape
         x = jnp.transpose(x, (1, 2, 3, 0))
@@ -235,48 +200,12 @@ class UFNO3d(eqx.Module):
             x = x1 + x2 + x3
             x = jax.nn.relu(x)
 
-        """
-        x1 = self.conv0(x)
-        x2 = self.w0(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x = x1 + x2
-        x = jax.nn.relu(x)
-
-        x1 = self.conv1(x)
-        x2 = self.w1(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x = x1 + x2
-        x = jax.nn.relu(x)
-
-        x1 = self.conv2(x)
-        x2 = self.w2(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x = x1 + x2 
-        x = jax.nn.relu(x)
-
-        x1 = self.conv3(x)
-        x2 = self.w3(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x3 = self.unet3(x, key=keys[0], deterministic=deterministic) 
-        x = x1 + x2 + x3
-        x = jax.nn.relu(x)
-
-        x1 = self.conv4(x)
-        x2 = self.w4(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x3 = self.unet4(x, key=keys[1], deterministic=deterministic)
-        x = x1 + x2 + x3
-        x = jax.nn.relu(x)
-        
-        x1 = self.conv5(x)
-        x2 = self.w5(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x3 = self.unet5(x, key=keys[2], deterministic=deterministic)
-        x = x1 + x2 + x3
-        x = jax.nn.relu(x)
-        """
-        
         x = jnp.transpose(x, (1, 2, 3, 0)) 
 
         x = jax.vmap(jax.vmap(jax.vmap(self.fc1, in_axes=0), in_axes=0), in_axes=0)(x)
         x = jax.nn.relu(x)
         x = jax.vmap(jax.vmap(jax.vmap(self.fc2, in_axes=0), in_axes=0), in_axes=0)(x)        
         x = jnp.transpose(x, (3, 0, 1, 2))
-        #x = self.conv1(x, key=key, deterministic=deterministic)
         x = x.reshape(self.out_channels,spatial_points_x+8, spatial_points_y+8, spatial_points_z+8)[:,:-8,:-8,:-8]
         return x
 
@@ -288,105 +217,5 @@ class UFNO3d(eqx.Module):
                 total += leaf.size
         return total
 
-"""
-class SimpleBlock3d(eqx.Module):
-    width: int
-    in_channels: int
-    out_channels: int
-    fc0: eqx.nn.Linear
-    fc1: eqx.nn.Linear
-    fc2: eqx.nn.Linear
-    conv0: SpectralConv3d
-    conv1: SpectralConv3d
-    conv2: SpectralConv3d
-    conv3: SpectralConv3d
-    conv4: SpectralConv3d
-    conv5: SpectralConv3d
-    w0: eqx.nn.Conv1d
-    w1: eqx.nn.Conv1d
-    w2: eqx.nn.Conv1d
-    w3: eqx.nn.Conv1d
-    w4: eqx.nn.Conv1d
-    w5: eqx.nn.Conv1d
-    unet3: U_net
-    unet4: U_net
-    unet5: U_net
 
-    def __init__(self, in_channels:int, out_channels:int, modes_x: int, modes_y: int, modes_z: int, width: int, p_do: float, *, key):
-        keys = jax.random.split(key, 18)
-        self.width = width
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.fc0   = eqx.nn.Linear(self.in_channels, width, key=keys[0])  
-        self.conv0 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[1])
-        self.conv1 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[2])
-        self.conv2 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[3])
-        self.conv3 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[4])
-        self.conv4 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[5])
-        self.conv5 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[6])
-        self.w0 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[7])
-        self.w1 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[8])
-        self.w2 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[9])
-        self.w3 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[10])
-        self.w4 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[11])
-        self.w5 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[12])
-        self.unet3 = U_net(width, width, 3, p_do, key=keys[13])  
-        self.unet4 = U_net(width, width, 3, p_do, key=keys[14])  
-        self.unet5 = U_net(width, width, 3, p_do, key=keys[15])  
-        self.fc1 = eqx.nn.Linear(width, 1024, key=keys[16])   
-        self.fc2 = eqx.nn.Linear(1024, self.out_channels, key=keys[17])  
-
-    def __call__(self, x: jnp.ndarray, key=None, deterministic=False):
-        if deterministic:
-            keys = 3 * [None]
-        else:
-            keys = jax.random.split(key, 3)
-        spatial_points_x, spatial_points_y, spatial_points_z, channels = x.shape   
-        
-        
-        x = jax.vmap(jax.vmap(jax.vmap(self.fc0, in_axes=0), in_axes=0), in_axes=0)(x)
-
-        x = jnp.transpose(x, (3, 0, 1, 2))
-
-        x1 = self.conv0(x)
-        x2 = self.w0(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x = x1 + x2
-        x = jax.nn.relu(x)
-
-        x1 = self.conv1(x)
-        x2 = self.w1(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x = x1 + x2
-        x = jax.nn.relu(x)
-
-        x1 = self.conv2(x)
-        x2 = self.w2(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x = x1 + x2 
-        x = jax.nn.relu(x)
-
-        x1 = self.conv3(x)
-        x2 = self.w3(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x3 = self.unet3(x, key=keys[0], deterministic=deterministic) 
-        x = x1 + x2 + x3
-        x = jax.nn.relu(x)
-
-        x1 = self.conv4(x)
-        x2 = self.w4(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x3 = self.unet4(x, key=keys[1], deterministic=deterministic)
-        x = x1 + x2 + x3
-        x = jax.nn.relu(x)
-        
-        x1 = self.conv5(x)
-        x2 = self.w5(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
-        x3 = self.unet5(x, key=keys[2], deterministic=deterministic)
-        x = x1 + x2 + x3
-        x = jax.nn.relu(x)
-        
-        x = jnp.transpose(x, (1, 2, 3, 0)) 
-
-        x = jax.vmap(jax.vmap(jax.vmap(self.fc1, in_axes=0), in_axes=0), in_axes=0)(x)
-        x = jax.nn.relu(x)
-        x = jax.vmap(jax.vmap(jax.vmap(self.fc2, in_axes=0), in_axes=0), in_axes=0)(x)        
-        x = jnp.transpose(x, (3, 0, 1, 2))            
-        return x
-"""    
 
