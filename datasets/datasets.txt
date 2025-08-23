@@ -1,0 +1,5 @@
+Datasets can be downloaded via Zenodo.
+
+To download the datset for steady-state radiative intensity: https://zenodo.org/records/16927464
+
+To download the datset for temporal evolution of radiative intensity: https://zenodo.org/records/16928552
