@@ -5,9 +5,7 @@ os.environ["MKL_NUM_THREADS"] = "12"
 os.environ["OPENBLAS_NUM_THREADS"] = "12"
 os.environ["NUMEXPR_NUM_THREADS"] = "12" 
 os.environ["XLA_FLAGS"] = "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=12"
-os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.4"
-
-
+os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.5"
 
 
 import jax
@@ -25,18 +23,21 @@ import matplotlib.pyplot as plt
 import imageio
 import time
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import FormatStrFormatter
 
 from architectures.ufno_3d_time import UFNO3d
+
+
 
 
 def objective(trial):
     
     # define regions in which hyperparameters should be optimized -> currently commented out to use fixed values found by optimal parameter search
-    #lr_start        = trial.suggest_float("lr_start", 5e-5, 5e-4, log=True)
-    #dr              = trial.suggest_float("decay_rate", 0.85, 0.99)
-    #wd              = trial.suggest_float("wd", 5e-4, 5e-3)
+    #lr_start        = trial.suggest_float("lr_start", 3e-4, 7e-4, log=True)
+    #dr              = trial.suggest_float("decay_rate", 0.87, 0.93)
+    #wd              = trial.suggest_float("wd", 3e-4, 7e-4)
+    #p_do            = trial.suggest_categorical("p_do", [0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10])
     #p_do            = trial.suggest_categorical("p_do", [0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10, 0.105, 0.11, 0.115, 0.12, 0.125, 0.13, 0.135, 0.14, 0.145, 0.15])
     #modes           = 4 #trial.suggest_int("modes", 4, 8)
     #width           = 32 #trial.suggest_int("width", 16, 32, step=4) 
@@ -47,10 +48,11 @@ def objective(trial):
     wd              = 0.00519380119678603
     p_do            = 0.08
     modes           = 4 
-    width           = 16
+    width           = 32
+    num_layers      = 6
 
     batch_size = 8
-    num_epochs = 30
+    num_epochs = 40
     n_samples_train = inputs_train.shape[0]
     n_batches_train = jnp.ceil((n_samples_train/batch_size)).astype(int) 
     n_samples_validation = inputs_validation.shape[0]
@@ -60,10 +62,11 @@ def objective(trial):
 
     
     # initialize the model
-    model = UFNO3d(in_channels=3, out_channels=1, modes_x=modes, modes_y=modes, modes_z=modes, width= width, p_do=p_do, key=jax.random.PRNGKey(0))
+    #model = UFNO3d(in_channels=3, out_channels=1, modes_x=modes, modes_y=modes, modes_z=modes, width= width, p_do=p_do, key=jax.random.PRNGKey(0))
+    model = UFNO3d(in_channels=3, out_channels=1, num_layers=num_layers, modes_x=modes, modes_y=modes, modes_z=modes, width= width, p_do=p_do, key=jax.random.PRNGKey(0))
 
     # load predefine model (before model needs to be initialized with the same hyperparameters (modes, width) as the saved model)
-    #model = eqx.tree_deserialise_leaves("saved_models/d3_ufno_time_density.eqx", model)
+    #model = eqx.tree_deserialise_leaves("surrogate_models/final_ufno_3d_time.eqx", model)
 
     # initialization of the optimizer (including lr schedule)
     schedule = optax.exponential_decay(lr_start, n_batches_train* num_epochs, dr)
@@ -91,6 +94,19 @@ def objective(trial):
     def mse_loss(model, x, y, key=None, deterministic=False):
         y_pred = jax.vmap(model, in_axes=(0, None, None))(x, key, deterministic)  
         return jnp.mean(jnp.square(y_pred - y))
+    
+    def relative_loss(model, x, y, key=None, deterministic=False):
+        y_pred = jax.vmap(model, in_axes=(0, None, None))(x, key, deterministic)  
+        #y_pred_flat = y_pred.reshape((y_pred.shape[0], -1))
+        #y_flat = y.reshape((y.shape[0], -1))
+        y_pred_flat = y_pred.reshape((-1))
+        y_flat = y.reshape((-1))
+        rel_err = jnp.abs((y_flat - y_pred_flat)/(y_flat + 1e-12))
+        mask = (y_flat != 0)
+        rel_err_masked = rel_err * mask
+        mean_error = jnp.sum(rel_err_masked) / jnp.sum(mask)
+        return mean_error
+        #return jnp.mean(jnp.abs((y_flat - y_pred_flat)/(y_flat + 1e-12)))
         
     def ufno_loss(model, x, y, key=None, deterministic=False):
         y_pred = jax.vmap(model, in_axes=(0, None, None))(x, key, deterministic)  
@@ -153,11 +169,22 @@ def objective(trial):
         x, y = eqx.filter_shard((x, y), sharding)
         loss = mse_loss(model, x, y, deterministic=True)  
         return loss
+    
+    @eqx.filter_jit(donate="all-except-first")
+    def evaluate_in_test(model, x, y, sharding):
+        replicated = sharding.replicate()
+        model = eqx.filter_shard(model, replicated)
+        x, y = eqx.filter_shard((x, y), sharding)
+        loss = relative_loss(model, x, y, deterministic=True)  
+        return loss
 
     model = eqx.filter_shard(model, replicated) 
     loss_history = []
     val_loss_history = []
     shuffle_key = jax.random.PRNGKey(20)
+    
+    print("Starting training...")
+    
     for e in range(num_epochs):
         shuffle_key, perm_key = random.split(shuffle_key)
         perm = jax.random.permutation(perm_key, inputs_train.shape[0])
@@ -172,21 +199,20 @@ def objective(trial):
             batch_x, batch_y = eqx.filter_shard((batch_x, batch_y), sharding)
             model, opt_state, loss = train_step(model, opt_state, subkey, batch_x, batch_y, sharding)
             loss_history.append(loss)
-
+    
         val_loss_tracker = 0
-        for i in range(0, inputs_test.shape[0], batch_size):
-            if i + batch_size > inputs_test.shape[0]: # skip last batch so sharding works
+        for i in range(0, inputs_validation.shape[0], batch_size):
+            if i + batch_size > inputs_validation.shape[0]: # skip last batch so sharding works
                 break
-            batch_x = inputs_test[i:i + batch_size]
-            batch_y = outputs_test[i:i + batch_size]
-        
+            batch_x = inputs_validation[i:i + batch_size]
+            batch_y = outputs_validation[i:i + batch_size]
+         
             batch_x, batch_y = eqx.filter_shard((batch_x, batch_y), sharding)
             val_loss = evaluate(model, batch_x, batch_y, sharding)
             val_loss_tracker += val_loss
         val_loss_history.append(val_loss_tracker/(n_batches_test-1))
-        print(f"Epoch {e+1}/{num_epochs}, Validation Loss: {val_loss_history[-1]:.5f}, Training Loss: {np.mean(loss_history[-n_batches_train:-1]):.5f}")
-        # attention: validation loss based on mse and train loss based on customly defined loss fct
-
+        print(f"Epoch {e+1}/{num_epochs}, Validation Loss (MSE): {val_loss_history[-1]:.5f}, Training Loss (Custom Loss 2): {np.mean(loss_history[-n_batches_train:-1]):.5f}")
+    
     test_loss = 0
     for i in range(0, inputs_test.shape[0], batch_size):
         if i + batch_size > inputs_test.shape[0]: # skip last batch to ensure sharding works 
@@ -194,20 +220,16 @@ def objective(trial):
         batch_x = inputs_test[i:i + batch_size]
         batch_y = outputs_test[i:i + batch_size]
         batch_x, batch_y = eqx.filter_shard((batch_x, batch_y), sharding)
-        test_loss = evaluate(model, batch_x, batch_y, sharding)
-        test_loss += test_loss
-    test_loss /= n_batches_test-1
-    print(f"Test Loss: {test_loss:.4f}")
+        test_loss += evaluate_in_test(model, batch_x, batch_y, sharding)
+    test_loss /= (n_batches_test-1)
+    print(f"Test Loss (Relative Loss): {test_loss:.4f}")
     
     # save best model - comment this in if you want to save your best model
-    #if not hasattr(objective, "best_loss") or test_loss < objective.best_loss:
-    #    objective.best_loss = test_loss
-    #    eqx.tree_serialise_leaves("saved_models/ufno_3d.eqx", model)
-
-    return test_loss
-
+    if not hasattr(objective, "best_loss") or test_loss < objective.best_loss:
+        objective.best_loss = test_loss
+        eqx.tree_serialise_leaves("surrogate_models/custom_ufno_3d_time.eqx", model)
     
-
+    return test_loss
     
 def preprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
     if xp_min.shape == ():
@@ -248,78 +270,133 @@ def unpreprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
 if __name__ == "__main__":
     print("Starting...")
 
-    data = np.load('data/3d_time_density/3d_time_density_train_data/test.npy') 
+    #inputs_train = np.load('../RTJAX/data/3d_time_density/3d_time_density_train_data/inputs_train.npy')#, mmap_mode='r')
+    #outputs_train = np.load('../RTJAX/data/3d_time_density/3d_time_density_train_data/outputs_train.npy')#, mmap_mode='r')
+    #inputs_validation = np.load('../RTJAX/data/3d_time_density/3d_time_density_train_data/inputs_validation.npy')#, mmap_mode='r')
+    #outputs_validation = np.load('../RTJAX/data/3d_time_density/3d_time_density_train_data/outputs_validation.npy')#, mmap_mode='r')
+    #inputs_test = np.load('../RTJAX/data/3d_time_density/3d_time_density_train_data/inputs_test.npy')#, mmap_mode='r')
+    #outputs_test = np.load('../RTJAX/data/3d_time_density/3d_time_density_train_data/outputs_test.npy')#, mmap_mode='r')
+    inputs_train = np.load('datasets/inputs_train_3d_time.npy')#, mmap_mode='r')
+    outputs_train = np.load('datasets/outputs_train_3d_time.npy')#, mmap_mode='r')
+    inputs_validation = np.load('datasets/inputs_validation_3d_time.npy')#, mmap_mode='r')
+    outputs_validation = np.load('datasets/outputs_validation_3d_time.npy')#, mmap_mode='r')
+    inputs_test = np.load('datasets/inputs_test_3d_time.npy')#, mmap_mode='r')
+    outputs_test = np.load('datasets/outputs_test_3d_time.npy')#, mmap_mode='r')
+
+    # remove following 4 lines
+    xp_min = jnp.array([-1.7541726, -8.000001, -8.000001]) 
+    xp_max = jnp.array([0.81056046, 4.197271, 5.4913197]) 
+    yp_min = jnp.array([-8.000001]) 
+    yp_max = jnp.array([5.4913197])
 
     print("Data has been loaded")
 
-    inputs_train = np.load('data/3d_time_density/3d_time_density_train_data/inputs_train.npy', mmap_mode='r')
-    outputs_train = np.load('data/3d_time_density/3d_time_density_train_data/outputs_train.npy', mmap_mode='r')
-    inputs_validation = np.load('data/3d_time_density/3d_time_density_train_data/inputs_validation.npy', mmap_mode='r')
-    outputs_validation = np.load('data/3d_time_density/3d_time_density_train_data/outputs_validation.npy', mmap_mode='r')
-    inputs_test = np.load('data/3d_time_density/3d_time_density_train_data/inputs_test.npy', mmap_mode='r')
-    outputs_test = np.load('data/3d_time_density/3d_time_density_train_data/outputs_test.npy', mmap_mode='r')
-
-    print("Data loaded")
-
     # start the Optuna (adjust number of trials) study and print out best parameters
+    time1 = time.time()
     study = optuna.create_study(direction="minimize", study_name="3d-time-study")
-    study.optimize(objective, n_trials=1 , n_jobs=1, gc_after_trial=True, show_progress_bar=True)
+    study.optimize(objective, n_trials=1, n_jobs=1, gc_after_trial=True, show_progress_bar=True)
     print("Best parameters:", study.best_params)
     print("Validation loss of best parameters:", study.best_value)
+    time2 = time.time()
+    print(f"Total time for optimization: {time2-time1:.4f} seconds")
 
 
     # the raw data needs to be reshaped and transformed into a train, validation and test set - uncomment the following lines to do this
-    """
-    data = np.load('path_to_raw_data')
+    
+    #import gc
+
+    #data = np.load('path_to_raw_data')
+    #data = np.load('../RTJAX/data/3d_time_density/3d_time_density_train_data/test.npy')
 
     # shuffle
-    data = data[jax.random.permutation(jax.random.PRNGKey(0), data.shape[0])] 
+    #data = data[jax.random.permutation(jax.random.PRNGKey(0), data.shape[0])] 
     
     # divide into train, validation, test
-    N_split = int(0.7 * data.shape[0])
-    N_split2 = int(0.8 * data.shape[0])
-    train_data = data[:N_split]
-    validation_data = data[N_split:N_split2]
-    test_data  = data[N_split:]
+    #N_split = int(0.7 * data.shape[0])
+    #N_split2 = int(0.8 * data.shape[0])
+    #train_data = data[:N_split]
+    #validation_data = data[N_split:N_split2]
+    #test_data  = data[N_split2:]
 
-    train_x = train_data[:, :2]
-    train_y = train_data[:, 2:]  
-    validation_x = validation_data[:, :2]
-    validation_y = validation_data[:, 2:]
-    test_x  = test_data[:, :2]
-    test_y  = test_data[:, 2:]  
+    #train_x = train_data[:, :2]
+    #train_y = train_data[:, 2:]  
+    #validation_x = validation_data[:, :2]
+    #validation_y = validation_data[:, 2:]
+    #test_x  = test_data[:, :2]
+    #test_y  = test_data[:, 2:]  
     
     # preprocess images at all t together s.t. they share the same scale 
 
-    train_x_log = np.log10(train_x + 1e-8) 
-    xp_min = np.min(train_x_log, axis = (0,2,3,4))   
-    xp_max = np.max(train_x_log, axis = (0,2,3,4))
-    train_y_log = np.log10(train_y + 1e-8) 
-    yp_min = np.min(train_y_log, axis = (0,1,2,3,4))  
-    yp_max = np.max(train_y_log, axis = (0,1,2,3,4))
+    #train_x_log = np.log10(train_x + 1e-8) 
+    #xp_min = np.min(train_x_log, axis = (0,2,3,4))   
+    #xp_max = np.max(train_x_log, axis = (0,2,3,4))
+    #train_y_log = np.log10(train_y + 1e-8) 
+    #yp_min = np.min(train_y_log, axis = (0,1,2,3,4))  
+    #yp_max = np.max(train_y_log, axis = (0,1,2,3,4))
 
-    inputs_train, outputs_train  = preprocess_data(train_x, train_y, xp_min, xp_max, yp_min, yp_max)
-    inputs_validation, outputs_validation = preprocess_data(validation_x, validation_y, xp_min, xp_max, yp_min, yp_max)
-    inputs_test, outputs_test = preprocess_data(test_x, test_y, xp_min, xp_max, yp_min, yp_max)
+    #inputs_train, outputs_train  = preprocess_data(train_x, train_y, xp_min, xp_max, yp_min, yp_max)
+    #inputs_validation, outputs_validation = preprocess_data(validation_x, validation_y, xp_min, xp_max, yp_min, yp_max)
+    #inputs_test, outputs_test = preprocess_data(test_x, test_y, xp_min, xp_max, yp_min, yp_max)
+
+    #del data
+    #gc.collect()
 
 
     # reshape data for recurrent training
-    slices_train = jnp.stack([outputs_train[:, i:i+2, ...] for i in range(outputs_train.shape[1]-1)], axis=0).reshape(outputs_train.shape[1]-1, -1, 2, outputs_train.shape[-3], outputs_train.shape[-2], outputs_train.shape[-1]).transpose(1, 0, 2, 3, 4, 5).reshape(-1, 2, outputs_train.shape[-3], outputs_train.shape[-2], outputs_train.shape[-1])
-    repeated_train_x = jnp.repeat(inputs_train, outputs_train.shape[1]-1, axis=0)  
-    inputs_train = jnp.concatenate([repeated_train_x, slices_train[:,0:1,:,:,:]], axis=1)
-    outputs_train = slices_train[:,1:2,:,:,:]
-    slices_test = jnp.stack([outputs_test[:, i:i+2, ...] for i in range(outputs_test.shape[1]-1)], axis=0).reshape(outputs_test.shape[1]-1, -1, 2, outputs_test.shape[-3], outputs_test.shape[-2], outputs_test.shape[-1]).transpose(1, 0, 2, 3, 4, 5).reshape(-1, 2, outputs_test.shape[-3], outputs_test.shape[-2], outputs_test.shape[-1])
-    repeated_test_x = jnp.repeat(inputs_test, outputs_test.shape[1]-1, axis=0)  
-    inputs_test = jnp.concatenate([repeated_test_x, slices_test[:,0:1,:,:,:]], axis=1)
-    outputs_test= slices_test[:,1:2,:,:,:]
+    #slices_train = jnp.stack([outputs_train[:, i:i+2, ...] for i in range(outputs_train.shape[1]-1)], axis=0).reshape(outputs_train.shape[1]-1, -1, 2, outputs_train.shape[-3], outputs_train.shape[-2], outputs_train.shape[-1]).transpose(1, 0, 2, 3, 4, 5).reshape(-1, 2, outputs_train.shape[-3], outputs_train.shape[-2], outputs_train.shape[-1])
+    #repeated_train_x = jnp.repeat(inputs_train, outputs_train.shape[1]-1, axis=0)  
+    #inputs_train = jnp.concatenate([repeated_train_x, slices_train[:,0:1,:,:,:]], axis=1)
+    #outputs_train = slices_train[:,1:2,:,:,:]
+    #jnp.save("datasets/inputs_train_3d_time.npy", inputs_train)
+    #jnp.save("datasets/outputs_train_3d_time.npy", outputs_train)
+    #del inputs_train
+    #del outputs_train
+    #gc.collect()
 
-    jnp.save("data/3d_time_density/3d_time_density_train_data/inputs_train.npy", inputs_train)
-    jnp.save("data/3d_time_density/3d_time_density_train_data/outputs_train.npy", outputs_train)
-    jnp.save("data/3d_time_density/3d_time_density_train_data/inputs_validation.npy", inputs_validation)
-    jnp.save("data/3d_time_density/3d_time_density_train_data/outputs_validation.npy", outputs_validation)
-    jnp.save("data/3d_time_density/3d_time_density_train_data/inputs_test.npy", inputs_test)
-    jnp.save("data/3d_time_density/3d_time_density_train_data/outputs_test.npy", outputs_test)
-    """
+    #slices_validation = jnp.stack([outputs_validation[:, i:i+2, ...] for i in range(outputs_validation.shape[1]-1)], axis=0).reshape(outputs_validation.shape[1]-1, -1, 2, outputs_validation.shape[-3], outputs_validation.shape[-2], outputs_validation.shape[-1]).transpose(1, 0, 2, 3, 4, 5).reshape(-1, 2, outputs_validation.shape[-3], outputs_validation.shape[-2], outputs_validation.shape[-1])
+    #repeated_validation_x = jnp.repeat(inputs_validation, outputs_validation.shape[1]-1, axis=0)  
+    #inputs_validation = jnp.concatenate([repeated_validation_x, slices_validation[:,0:1,:,:,:]], axis=1)
+    #outputs_validation = slices_validation[:,1:2,:,:,:]
+    #jnp.save("datasets/inputs_validation_3d_time.npy", inputs_validation)
+    #jnp.save("datasets/outputs_validation_3d_time.npy", outputs_validation) 
+    #del inputs_validation
+    #del outputs_validation
+    #gc.collect()
+
+    #slices_test = jnp.stack([outputs_test[:, i:i+2, ...] for i in range(outputs_test.shape[1]-1)], axis=0).reshape(outputs_test.shape[1]-1, -1, 2, outputs_test.shape[-3], outputs_test.shape[-2], outputs_test.shape[-1]).transpose(1, 0, 2, 3, 4, 5).reshape(-1, 2, outputs_test.shape[-3], outputs_test.shape[-2], outputs_test.shape[-1])
+    #repeated_test_x = jnp.repeat(inputs_test, outputs_test.shape[1]-1, axis=0)  
+    #inputs_test = jnp.concatenate([repeated_test_x, slices_test[:,0:1,:,:,:]], axis=1)
+    #outputs_test= slices_test[:,1:2,:,:,:]
+    #jnp.save("datasets/inputs_test_3d_time.npy", inputs_test)
+    #jnp.save("datasets/outputs_test_3d_time.npy", outputs_test)
+    #del inputs_test
+    #del outputs_test
+    #gc.collect()
+    
+
+    # measure prediction time
+    #p_do = 0.07 
+    #modes = 4
+    #width = 16
+
+    # initialization of the model
+    #model = UFNO3d(in_channels=3, out_channels=1, modes_x=modes, modes_y=modes, modes_z=modes, width=width, p_do= p_do, key=jax.random.PRNGKey(0))  
+    
+    # load predefine model (before model needs to be initialized with the same hyperparameters (modes, width) as the saved model)
+    #model = eqx.tree_deserialise_leaves("surrogate_models/ufno_3d.eqx", model)
+    
+    #t1 = time.time()
+    #pred1 = model(inputs_test[0], deterministic=True)
+    #t2 = time.time()
+    #t3 = time.time()
+    #pred2 = model(inputs_test[1], deterministic=True)
+    #t4 = time.time()
+    #t5 = time.time()
+    #pred2 = model(inputs_test[2], deterministic=True)
+    #t6 = time.time()
+    #print(f"Prediction time for first sample: {t2-t1:.4f} seconds")
+    #print(f"Prediction time for second sample: {t4-t3:.4f} seconds")
+    #print(f"Prediction time for second sample: {t6-t5:.4f} seconds")
 
     
     
