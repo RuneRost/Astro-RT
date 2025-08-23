@@ -22,7 +22,7 @@ from matplotlib.ticker import MaxNLocator
 from matplotlib.ticker import FormatStrFormatter
 from matplotlib import colors
 
-from architectures.n_ufno_3d import UFNO3d
+from architectures.ufno_3d import UFNO3d
 
 
 def evaluate():

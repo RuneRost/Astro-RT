@@ -22,16 +22,7 @@ class SpectralConv3d(eqx.Module):
     modes_z: int
     
 
-    def __init__(
-            self,
-            in_channels,
-            out_channels,
-            modes_x,
-            modes_y,
-            modes_z,
-            *,
-            key,
-    ):
+    def __init__(self, in_channels, out_channels, modes_x, modes_y, modes_z, *, key):
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.modes_x = modes_x
@@ -39,7 +30,6 @@ class SpectralConv3d(eqx.Module):
         self.modes_z = modes_z
  
         scale = jnp.sqrt(1.0 / (in_channels + out_channels)) 
-
 
         keys = jax.random.split(key, 8)
         self.real_weights1 = jax.random.uniform(keys[0], (in_channels, out_channels, modes_x, modes_y, modes_z), minval=-scale, maxval=+scale)
@@ -57,7 +47,6 @@ class SpectralConv3d(eqx.Module):
     
     def __call__(self, x):
         channels, spatial_points_x, spatial_points_y, spatial_points_z = x.shape
-
         x_hat = jnp.fft.rfftn(x, axes=(1, 2, 3))  
 
         weights1 = self.real_weights1 + 1j * self.imag_weights1
@@ -65,10 +54,7 @@ class SpectralConv3d(eqx.Module):
         weights3 = self.real_weights3 + 1j * self.imag_weights3
         weights4 = self.real_weights4 + 1j * self.imag_weights4
 
-
         out_hat = jnp.zeros((self.out_channels, *x_hat.shape[1:]),dtype=x_hat.dtype) 
-
-        # check again 
         out_hat = out_hat.at[:, :self.modes_x, :self.modes_y, :self.modes_z].set(self.complex_mult3d(x_hat[:, :self.modes_x, :self.modes_y, :self.modes_z], weights1))
         out_hat = out_hat.at[:, -self.modes_x:, :self.modes_y, :self.modes_z].add(self.complex_mult3d(x_hat[:, -self.modes_x:, :self.modes_y, :self.modes_z], weights2))
         out_hat = out_hat.at[:, :self.modes_x, -self.modes_y:, :self.modes_z].add(self.complex_mult3d(x_hat[:, :self.modes_x, -self.modes_y:, :self.modes_z], weights3))
@@ -151,7 +137,158 @@ class U_net(eqx.Module):
         out_deconv0   = self.deconv0(concat1)                                 
         concat0   = jnp.concatenate([x, out_deconv0], axis=0)
         return self.output_layer(concat0)
+    
 
+class UFNO3d(eqx.Module):
+    #conv1: SimpleBlock3d
+    in_channels: int
+    out_channels: int
+    width: int
+    in_channels: int
+    out_channels: int
+    num_layers: int
+    fc0: eqx.nn.Linear
+    fc1: eqx.nn.Linear
+    fc2: eqx.nn.Linear
+    spectral_convs: list[SpectralConv3d]
+    bypass_convs: list[eqx.nn.Conv1d]
+    unets: list[U_net]
+    #conv0: SpectralConv3d
+    #conv1: SpectralConv3d
+    #conv2: SpectralConv3d
+    #conv3: SpectralConv3d
+    #conv4: SpectralConv3d
+    #conv5: SpectralConv3d
+    #w0: eqx.nn.Conv1d
+    #w1: eqx.nn.Conv1d
+    #w2: eqx.nn.Conv1d
+    #w3: eqx.nn.Conv1d
+    #w4: eqx.nn.Conv1d
+    #w5: eqx.nn.Conv1d
+    #unet3: U_net
+    #unet4: U_net
+    #unet5: U_net
+
+    def __init__(self, in_channels:int, out_channels:int, num_layers: int, modes_x: int, modes_y: int, modes_z: int, width: int, p_do: float, *, key):
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.num_layers = num_layers
+        #self.conv1 = SimpleBlock3d(in_channels, out_channels, modes_x, modes_y, modes_z, width, p_do, key=key)
+        keys = jax.random.split(key, 4)
+        self.width = width
+        self.fc0   = eqx.nn.Linear(self.in_channels, width, key=keys[0]) 
+        self.fc1 = eqx.nn.Linear(width, 1024, key=keys[1])   
+        self.fc2 = eqx.nn.Linear(1024, self.out_channels, key=keys[2]) 
+
+        self.spectral_convs = []
+        self.bypass_convs = []
+        self.unets =[]
+
+        splitkey = keys[3]
+        for i in range(self.num_layers):
+            key1, key2, key3, splitkey = jax.random.split(splitkey, 4)  
+            self.spectral_convs.append(SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=key1)) 
+            self.bypass_convs.append(eqx.nn.Conv1d(width, width, kernel_size=1, key=key2))
+            self.unets.append(U_net(width, width, 3, p_do, key=key3))
+        
+        #self.fc0   = eqx.nn.Linear(self.in_channels, width, key=keys[0])  
+        #self.conv0 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[1])
+        #self.conv1 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[2])
+        #self.conv2 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[3])
+        #self.conv3 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[4])
+        #self.conv4 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[5])
+        #self.conv5 = SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=keys[6])
+        #self.w0 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[7])
+        #self.w1 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[8])
+        #self.w2 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[9])
+        #self.w3 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[10])
+        #self.w4 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[11])
+        #self.w5 = eqx.nn.Conv1d(width, width, kernel_size=1, key=keys[12])
+        #self.unet3 = U_net(width, width, 3, p_do, key=keys[13])  
+        #self.unet4 = U_net(width, width, 3, p_do, key=keys[14])  
+        #self.unet5 = U_net(width, width, 3, p_do, key=keys[15])  
+        #self.fc1 = eqx.nn.Linear(width, 1024, key=keys[16])   
+        #self.fc2 = eqx.nn.Linear(1024, self.out_channels, key=keys[17]) 
+    
+
+    def __call__(self, x, key=None, deterministic=False):
+        channels, spatial_points_x, spatial_points_y, spatial_points_z = x.shape
+        x = jnp.transpose(x, (1, 2, 3, 0))
+        x = jnp.pad(x, ((0,0), (0,8), (0,8), (0,0)), mode='edge')
+        x = jnp.pad(x, ((0,8), (0,0), (0,0), (0,0)), mode='constant', constant_values=0)
+        if not deterministic and key is None:
+                raise ValueError("When running in nondeterministic mode key must be provided")
+        if deterministic:
+                    keys = self.num_layers * [None]
+        else:
+            keys = jax.random.split(key, self.num_layers)  
+
+        
+        
+        x = jax.vmap(jax.vmap(jax.vmap(self.fc0, in_axes=0), in_axes=0), in_axes=0)(x)
+        x = jnp.transpose(x, (3, 0, 1, 2))
+
+        for i in range(self.num_layers):
+            x1 = self.spectral_convs[i](x)
+            x2 = self.bypass_convs[i](x.reshape(self.width, -1)).reshape(self.width, spatial_points_x+8, spatial_points_y+8, spatial_points_z+8)
+            x3 = self.unets[i](x, key=keys[i], deterministic=deterministic)
+            x = x1 + x2 + x3
+            x = jax.nn.relu(x)
+
+        """
+        x1 = self.conv0(x)
+        x2 = self.w0(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
+        x = x1 + x2
+        x = jax.nn.relu(x)
+
+        x1 = self.conv1(x)
+        x2 = self.w1(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
+        x = x1 + x2
+        x = jax.nn.relu(x)
+
+        x1 = self.conv2(x)
+        x2 = self.w2(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
+        x = x1 + x2 
+        x = jax.nn.relu(x)
+
+        x1 = self.conv3(x)
+        x2 = self.w3(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
+        x3 = self.unet3(x, key=keys[0], deterministic=deterministic) 
+        x = x1 + x2 + x3
+        x = jax.nn.relu(x)
+
+        x1 = self.conv4(x)
+        x2 = self.w4(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
+        x3 = self.unet4(x, key=keys[1], deterministic=deterministic)
+        x = x1 + x2 + x3
+        x = jax.nn.relu(x)
+        
+        x1 = self.conv5(x)
+        x2 = self.w5(x.reshape(self.width, -1)).reshape(self.width, spatial_points_x, spatial_points_y, spatial_points_z)
+        x3 = self.unet5(x, key=keys[2], deterministic=deterministic)
+        x = x1 + x2 + x3
+        x = jax.nn.relu(x)
+        """
+        
+        x = jnp.transpose(x, (1, 2, 3, 0)) 
+
+        x = jax.vmap(jax.vmap(jax.vmap(self.fc1, in_axes=0), in_axes=0), in_axes=0)(x)
+        x = jax.nn.relu(x)
+        x = jax.vmap(jax.vmap(jax.vmap(self.fc2, in_axes=0), in_axes=0), in_axes=0)(x)        
+        x = jnp.transpose(x, (3, 0, 1, 2))
+        #x = self.conv1(x, key=key, deterministic=deterministic)
+        x = x.reshape(self.out_channels,spatial_points_x+8, spatial_points_y+8, spatial_points_z+8)[:,:-8,:-8,:-8]
+        return x
+
+    def count_params(self):
+        leaves = jax.tree_util.tree_leaves(self)
+        total = 0
+        for leaf in leaves:
+            if isinstance(leaf, jnp.ndarray):
+                total += leaf.size
+        return total
+
+"""
 class SimpleBlock3d(eqx.Module):
     width: int
     in_channels: int
@@ -251,34 +388,5 @@ class SimpleBlock3d(eqx.Module):
         x = jax.vmap(jax.vmap(jax.vmap(self.fc2, in_axes=0), in_axes=0), in_axes=0)(x)        
         x = jnp.transpose(x, (3, 0, 1, 2))            
         return x
-    
+"""    
 
-class UFNO3d(eqx.Module):
-    conv1: SimpleBlock3d
-    in_channels: int
-    out_channels: int
-
-    def __init__(self, in_channels:int, out_channels:int, modes_x: int, modes_y: int, modes_z: int, width: int, p_do: float, *, key):
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.conv1 = SimpleBlock3d(in_channels, out_channels, modes_x, modes_y, modes_z, width, p_do, key=key)
-    
-
-    def __call__(self, x, key=None, deterministic=False):
-        channels, spatial_points_x, spatial_points_y, spatial_points_z = x.shape
-        x = jnp.transpose(x, (1, 2, 3, 0))
-        x = jnp.pad(x, ((0,0), (0,8), (0,8), (0,0)), mode='edge')
-        x = jnp.pad(x, ((0,8), (0,0), (0,0), (0,0)), mode='constant', constant_values=0)
-        if not deterministic and key is None:
-                raise ValueError("When running in nondeterministic mode key must be provided")
-        x = self.conv1(x, key=key, deterministic=deterministic)
-        x = x.reshape(self.out_channels,spatial_points_x+8, spatial_points_y+8, spatial_points_z+8)[:,:-8,:-8,:-8]
-        return x
-
-    def count_params(self):
-        leaves = jax.tree_util.tree_leaves(self)
-        total = 0
-        for leaf in leaves:
-            if isinstance(leaf, jnp.ndarray):
-                total += leaf.size
-        return total

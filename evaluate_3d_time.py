@@ -25,7 +25,7 @@ import sys
 from matplotlib.ticker import MaxNLocator
 from matplotlib.ticker import FormatStrFormatter
 
-from architectures.n_ufno_3d_time import UFNO3d
+from architectures.ufno_3d_time import UFNO3d
 
 
 def evaluate():
