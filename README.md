@@ -18,7 +18,7 @@ To address these shortcomings, we employ Neural Operators, to develop surrogate 
 We employ a specific class of Neural Operators known as the [Fourier Neural Operator](https://arxiv.org/abs/2010.08895) (FNO) and combines it with a [U-Net](https://arxiv.org/abs/1505.04597) architecture, following the approach chosen in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697). 
 
 <p align="center">
-  <img src="plots/UFNO-Fig.png" alt=" " width="1000">
+  <img src="plots/U-FNO-Fig.png" alt=" " width="1000">
 </p>
 
 
