@@ -8,11 +8,9 @@ This repository contains the code accompanying the paper *Emulating Radiative Tr
 </p>
 
 
-Radiative transfer is a cornerstone of computational astrophysics, providing the essential link between physical models and observational diagnostics. Simulating the propagation of radiation requires solving the radiative transfer equation (RTE), which, due to its high dimensionality, is computationally expensive to solve numerically ([Buck et al., 2017](https://arxiv.org/abs/1612.05277)).
+Radiative transfer is a cornerstone of computational astrophysics, providing the essential link between physical models and observational diagnostics. Simulating the propagation of radiation requires solving the radiative transfer equation (RTE), which, due to its high dimensionality, is computationally expensive to solve numerically.
 Accurate solutions require fine resolution, leading to significant challenges in terms of memory and computing time, particularly in multi-dimensional or time-dependent simulations.
-Proposed numerical methods often suffer from high computational costs, dimensionality issues, or instability
-while traditional deep learning approaches often struggle with generalization across discretizations and parameter settings, 
-as well as stability in high-dimensional PDE problems. 
+Proposed numerical methods often suffer from high computational costs, dimensionality issues, or instability while traditional deep learning approaches often struggle with generalization across discretizations and parameter settings, as well as stability in high-dimensional PDE problems. 
 
 To address these shortcomings, we employ Neural Operators, to develop surrogate models for simulating radiative transfer. We present two Neural Operator–based surrogate models for three-dimensional radiative transfer, achieving significant speedups while maintaining high accuracy.
 We employ a specific class of Neural Operators known as the [Fourier Neural Operator](https://arxiv.org/abs/2010.08895) (FNO) and combines it with a [U-Net](https://arxiv.org/abs/1505.04597) architecture, following the approach chosen in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697). 
@@ -45,32 +43,31 @@ In our paper we consider two scenarios in which we want to emulate Radiative Tra
 1. Prediction of steady-state radiative intensity setting in for $t \to \infty$ 
 2. Temporal evolution of radiative intensity from a starting point where $I_0=0$
 
-To train and evaluate the steady-state model we provide a dataset consisting of samples, that each comprise an absorption and emission field as well as the corresponding steady-state radiative intensity. These are generated using the code from [here](https://github.com/lorenzobranca/Ray-trax).
+To train and evaluate a steady-state model we provide a dataset consisting of samples, that each comprise an absorption and emission field as well as the corresponding steady-state radiative intensity. These are generated using the code from [here](https://github.com/lorenzobranca/Ray-trax).
 
-To train the steady-state model, run this command:
+To train a steady-state model, run this command:
 
 ```train
 python train_3d.py 
 ```
 
-In this script data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below. During training the performance of the model on the validation set is assessed and after training predictions are made on the test set to evaluate the quality of the model.
-If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d.eqx` in the [`surrogate_models`](surrogate_models) folder. In this case you can comment out the training part (or simply set the number of trained epochs to 0)
+In this script ([`train_3d.py`](train_3d.py)) data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below. During training the performance of the model on the validation set is assessed and after training predictions are made on the test set to evaluate the quality of the model.
+If you would like to test the performance of our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d.eqx` in the [`surrogate_models`](surrogate_models) folder. In this case you can comment out the training part (or simply set the number of trained epochs to 0)
 
 
 
-To train and evaluate the model for the temporal evolution we provide a training, validation and test set, each consisting of samples, that comprise an absorption and emission field as well as two consectuive snapshots of the temporal evolution of the corresponding radiative intensity. Thee samples were also generated using the code from [here](https://github.com/lorenzobranca/Ray-trax) and further split into training, validation and test set using the code that is currently commented out at the end of the file. 
-To train the model for the temporal evolution, run this command:
+To train and evaluate a model for the temporal evolution we provide a training, validation and test set, each consisting of samples, that comprise an absorption and emission field as well as two consectuive snapshots of the temporal evolution of the corresponding radiative intensity. Thee samples were also generated using the code from [here](https://github.com/lorenzobranca/Ray-trax) and further split into training, validation and test set using the code that is currently commented out at the end of the file. 
+
+To train a model for the temporal evolution, run this command:
 
 ```train
 python train_3d_time.py 
 ```
 
-In this script an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below. During training the performance of the model on the validation set is assessed and after training predictions are made on the test set to evaluate the quality of the model.
-If you would like to run inference with our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d_time.eqx` in the [`surrogate_models`](surrogate_models) folder. In this case you can comment out the training part (or simply set the number of trained epochs to 0)
+In this script ([`train_3d_time.py`](train_3d_time.py)) an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below. During training the performance of the model on the validation set is assessed and after training predictions are made on the test set to evaluate the quality of the model.
+If you would like to test the performance of our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d_time.eqx` in the [`surrogate_models`](surrogate_models) folder. In this case you can comment out the training part (or simply set the number of trained epochs to 0)
 
 Both architectures are build following the approach in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697).
-
-CHANGE THIS DEPENDING ON IF I STORE THE SPLITTED FILES OR THE ORIGINAL FILE OR MAYBE JUST BOTH
 
 
 Optimal hyperparameters for the steady-state model and its training:
@@ -112,6 +109,17 @@ We additionally provide two scripts with which you can recreate the plots shown 
 - [`evaluate_3d_time.py`](evaluate_3d_time.py) allows you to create all the plots we show for the prediction of the temporal evolution of radiative intensity
 
 Both files allow you to choose which model to load (in case you trained your own models) and on which files to run the evaluation (if you created your own datasets).
+To execute these files, run the commands:
+
+```evaluate
+python evaluate_3d.py 
+```
+... for evluating the steady-state model.
+
+```evaluate
+python evaluate_3d.py 
+```
+... for evluating the recurrent model.
 
 ## Datasets
 
