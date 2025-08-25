@@ -332,7 +332,7 @@ if __name__ == "__main__":
     t1 = time.time()
     pred = pred_fn(inputs_test[1])
     t2 = time.time()
-    
+
     print(f"Prediction time for one sample: {t2-t1:.4f} seconds")
 
     # alternative approach (even faster)
@@ -349,18 +349,3 @@ if __name__ == "__main__":
     t4 = time.time()
 
     print(f"Prediction time for one sample (faster approach): {t4-t3:.4f} seconds")
-
-
-
-    
-
-    
-
-
-    
-    
-    
-    
-    
-
-    

@@ -205,6 +205,3 @@ class UFNO3d(eqx.Module):
             if isinstance(leaf, jnp.ndarray):
                 total += leaf.size
         return total
-
-
-

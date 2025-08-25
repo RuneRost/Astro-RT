@@ -280,15 +280,3 @@ if __name__ == "__main__":
     print("Validation loss of best parameters:", study.best_value)
     time2 = time.time()
     print(f"Total time for optimization: {time2-time1:.4f} seconds")
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-
-    

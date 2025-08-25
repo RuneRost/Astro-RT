@@ -622,20 +622,4 @@ if __name__ == "__main__":
     final_state, inputs_all = jax.lax.scan(step_fn, inputs_test[9, :, :, :, :], xs=None, length=9) # every 9th sample in inputs_test represents a starting position
     t2 = time.time()
 
-    print(f"Prediction time for full temporal evolution of one sample: {t2-t1:.4f} seconds")
-
-
-
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-
-    
+    print(f"Prediction time for full temporal evolution of one sample: {t2-t1:.4f} seconds")  

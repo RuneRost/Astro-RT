@@ -256,10 +256,4 @@ if __name__ == "__main__":
     study = optuna.create_study(direction="minimize", study_name="3d-study")
     study.optimize(objective, n_trials=1, n_jobs=1, gc_after_trial=True, show_progress_bar=True)
     print("Best parameters:", study.best_params)
-    print("Test loss of best parameters:", study.best_value)
-
-    
-    
-    
-
-    
+    print("Test loss of best parameters:", study.best_value) 
