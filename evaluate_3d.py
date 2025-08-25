@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 os.environ["OMP_NUM_THREADS"] = "8"
 os.environ["MKL_NUM_THREADS"] = "8"
 os.environ["OPENBLAS_NUM_THREADS"] = "8"
@@ -27,15 +27,14 @@ from architectures.ufno_3d import UFNO3d
 
 def evaluate():
     
-    # load your predefined model
-    p_do = 0.07 
+    # load your saved model (hyperparameters must match the saved model)
     modes = 4
     width = 16
+    num_layers = 6
     batch_size = 8
 
-
-    model = UFNO3d(in_channels=2, out_channels=1, num_layers=6, modes_x=modes, modes_y=modes, modes_z=modes, width=width, p_do= p_do, key=jax.random.PRNGKey(0))  
-    model = eqx.tree_deserialise_leaves("surrogate_models/final_optuna_ufno_3d.eqx", model)
+    model = UFNO3d(in_channels=2, out_channels=1, num_layers=num_layers, modes_x=modes, modes_y=modes, modes_z=modes, width=width, p_do= 0.0, key=jax.random.PRNGKey(0))  
+    model = eqx.tree_deserialise_leaves("surrogate_models/ufno_3d.eqx", model)
 
     print("Model loaded")
 
@@ -56,7 +55,7 @@ def evaluate():
     n_samples_test = inputs_test.shape[0]
     n_batches_test = jnp.ceil((n_samples_test/batch_size)).astype(int)
 
-    # different loss functions we tried 
+    # different loss functions
     def mse_loss(model, x, y, key=None, deterministic=False):
         y_pred = jax.vmap(model, in_axes=(0, None, None))(x, key, deterministic)  
         return jnp.mean(jnp.square(y_pred - y))
@@ -89,36 +88,6 @@ def evaluate():
     print(f"Test Loss: {test_loss:.4f}")
     
     ## the following code can be used to recreate all plots shown in our paper  
-
-    N = (outputs_test.shape[0]//batch_size)*batch_size
-    M = outputs_test.shape[2] * outputs_test.shape[3] * outputs_test.shape[4]
-    residuals_flat = jnp.zeros(N * M)
-    for i in range(0, inputs_test.shape[0], batch_size):
-        if i + batch_size > inputs_test.shape[0]: # skip last batch so sharding works
-            break
-        batch_x = inputs_test[i:i + batch_size]
-        batch_y = outputs_test[i:i + batch_size]
-        batch_x, batch_y = eqx.filter_shard((batch_x, batch_y), sharding)
-        replicated = sharding.replicate()
-        model = eqx.filter_shard(model, replicated)
-        key = None
-        deterministic = True
-        y_pred = jax.vmap(model, in_axes=(0, None, None))(batch_x, key, deterministic)
-        residuals = (y_pred - batch_y).reshape((-1))
-        residuals_flat  = residuals_flat.at[i*M:(i+ batch_size)*M].add(residuals)
-
-    fig, ax = plt.subplots(1, 1, figsize=(30, 30))
-    ax.ticklabel_format(style='plain', axis='y')
-    ax.set_yticks([60000000, 120000000, 180000000, 240000000])
-    ax.hist(residuals_flat, bins=100, alpha=0.8, range=(-0.08, 0.08)) 
-    ax.set_xlabel('Residual', fontsize=64)
-    ax.set_ylabel("Number of pixels", fontsize=64)
-    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=48)
-    ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
-    ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-    plt.tight_layout()
-    plt.show()
-    plt.savefig('histo_3d_residual.pdf', bbox_inches='tight')
 
     N = (outputs_test.shape[0]//batch_size)*batch_size
     M = outputs_test.shape[2] * outputs_test.shape[3] * outputs_test.shape[4]
@@ -179,10 +148,11 @@ def evaluate():
     axes[2].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
     cb = fig.colorbar(im2, ax=axes[2], fraction=0.046, pad=0.04)
     cb.ax.tick_params(labelsize=24) 
+    cb.set_label(r"$\text{Prediction} - \text{Reference}$", fontsize=30)
 
     plt.tight_layout()
     plt.show()
-    plt.savefig('3d_XY_plane.png', bbox_inches='tight')
+    plt.savefig('3d_XY_plane.pdf', bbox_inches='tight')
 
 
     fig, axes = plt.subplots(1, 3, figsize=(30, 30))
@@ -212,6 +182,7 @@ def evaluate():
     axes[2].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
     cb = fig.colorbar(im2, ax=axes[2], fraction=0.046, pad=0.04)
     cb.ax.tick_params(labelsize=24) 
+    cb.set_label(r"$\text{Prediction} - \text{Reference}$", fontsize=30)
     plt.tight_layout()
     plt.show()
     plt.savefig('3d_XZ_plane.pdf', bbox_inches='tight')
@@ -246,6 +217,7 @@ def evaluate():
     axes[2].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
     cb = fig.colorbar(im2, ax=axes[2], fraction=0.046, pad=0.04)
     cb.ax.tick_params(labelsize=24) 
+    cb.set_label(r"$\text{Prediction} - \text{Reference}$", fontsize=30)
 
     plt.tight_layout()
     plt.show()
@@ -325,87 +297,64 @@ def evaluate():
     plt.show()
     plt.savefig('ajI_3d.pdf', bbox_inches='tight')
 
-
-def preprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
-    if xp_min.shape == ():
-        pass
-    else:
-        xp_min = xp_min[:, None, None, None]
-        xp_max = xp_max[:, None, None, None]
-    if yp_min.shape == ():
-        pass
-    else:
-        yp_min = yp_min[:, None, None, None]
-        yp_max = yp_max[:, None, None, None]
-
-    data_x = (np.log10(data_x + 1e-8) - xp_min)/ (xp_max - xp_min)  
-    data_y = (np.log10(data_y + 1e-8) - yp_min)/ (yp_max - yp_min)
-    return data_x, data_y
-
-
-def unpreprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
-    if xp_min.shape == ():
-        pass
-    else:
-        xp_min = xp_min[:, None, None, None]
-        xp_max = xp_max[:, None, None, None]
-    if yp_min.shape == ():
-        pass
-    else:
-        yp_min = yp_min[:, None, None, None]
-        yp_max = yp_max[:, None, None, None]
-
-    data_x = 10**((data_x * (xp_max - xp_min)) + xp_min - 1e-8)
-    data_y = 10**((data_y * (yp_max - yp_min)) + yp_min - 1e-8)
-    return data_x, data_y
-
-
-
    
 if __name__ == "__main__":
     print("Starting...")
 
+    # in the README file there is a description on how to download the datsets
+
     inputs_test = np.load('datasets/inputs_test_3d.npy')
     outputs_test = np.load('datasets/outputs_test_3d.npy')
 
+    # values with which data was preprocessed
     xp_min = jnp.array([-3.3366387, -8.000001])   
     xp_max = jnp.array([2.5393524, 4.189061])
     yp_min = jnp.array([-7.9991336])
     yp_max = jnp.array([5.1919284])
 
-
-    #p_do = 0.07 
-    #modes = 4
-    #width = 16
-    #batch_size = 8
-    #model = UFNO3d(in_channels=2, out_channels=1, num_layers=6, modes_x=modes, modes_y=modes, modes_z=modes, width=width, p_do= p_do, key=jax.random.PRNGKey(0))  
-    #model = eqx.tree_deserialise_leaves("surrogate_models/final_optuna_ufno_3d.eqx", model)
-    #t1 = time.time()
-    #pred1 = model(inputs_test[0], deterministic=True)
-    #t2 = time.time()
-    #t3 = time.time()
-    #pred2 = model(inputs_test[1], deterministic=True)
-    #t4 = time.time()
-    #t5 = time.time()
-    #pred2 = model(inputs_test[2], deterministic=True)
-    #t6 = time.time()
-    #t7 = time.time()
-    #pred3 = model(inputs_test[3], deterministic=True)
-    #t8 = time.time()
-    #t9 = time.time()
-    #pred4 = model(inputs_test[4], deterministic=True)
-    #t10 = time.time()
-    #t11 = time.time()
-    #pred5 = model(inputs_test[5], deterministic=True)
-    #t12 = time.time()
-    #print(f"Prediction time for first sample: {t2-t1:.4f} seconds")
-    #print(f"Prediction time for second sample: {t4-t3:.4f} seconds")
-    #print(f"Prediction time for second sample: {t6-t5:.4f} seconds")
-    #print(f"Prediction time for second sample: {t8-t7:.4f} seconds")
-    #print(f"Prediction time for second sample: {t10-t9:.4f} seconds")
-    #print(f"Prediction time for second sample: {t12-t11:.4f} seconds")
-
     evaluate()
+
+    # additional code to measure prediction time of our model
+
+    p_do = 0.07 
+    modes = 4
+    width = 16
+    batch_size = 8
+    model = UFNO3d(in_channels=2, out_channels=1, num_layers=6, modes_x=modes, modes_y=modes, modes_z=modes, width=width, p_do= p_do, key=jax.random.PRNGKey(0))  
+    model = eqx.tree_deserialise_leaves("surrogate_models/ufno_3d.eqx", model)
+
+
+    pred_fn = jax.jit(lambda x: model(x, deterministic=True))
+    # warmup
+    pred = pred_fn(inputs_test[0])
+
+    # measure time
+    t1 = time.time()
+    pred = pred_fn(inputs_test[1])
+    t2 = time.time()
+    
+    print(f"Prediction time for one sample: {t2-t1:.4f} seconds")
+
+    # alternative approach (even faster)
+    def step_fn(carry, _):
+        input = carry
+        output = model(input, deterministic=True)
+        return input, output
+    # warmup run
+    final_state, inputs_all = jax.lax.scan(step_fn, inputs_test[0], xs=None, length=1)
+
+    # measure time
+    t3 = time.time()
+    final_state, inputs_all = jax.lax.scan(step_fn, inputs_test[1], xs=None, length=1)
+    t4 = time.time()
+
+    print(f"Prediction time for one sample (faster approach): {t4-t3:.4f} seconds")
+
+
+
+    
+
+    
 
 
     

@@ -3,8 +3,6 @@
 import jax
 import jax.numpy as jnp
 import equinox as eqx
-from jax import vmap
-from functools import partial
 
 class SpectralConv3d(eqx.Module):
     real_weights1: jax.Array
@@ -21,7 +19,6 @@ class SpectralConv3d(eqx.Module):
     modes_y: int
     modes_z: int
     
-
     def __init__(self, in_channels, out_channels, modes_x, modes_y, modes_z, *, key):
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -40,7 +37,6 @@ class SpectralConv3d(eqx.Module):
         self.imag_weights3 = jax.random.uniform(keys[5], (in_channels, out_channels, modes_x, modes_y, modes_z), minval=-scale, maxval=+scale)  
         self.real_weights4 = jax.random.uniform(keys[6], (in_channels, out_channels, modes_x, modes_y, modes_z), minval=-scale, maxval=+scale)
         self.imag_weights4 = jax.random.uniform(keys[7], (in_channels, out_channels, modes_x, modes_y, modes_z), minval=-scale, maxval=+scale)  
-
 
     def complex_mult3d(self, x_hat, w):
         return jnp.einsum("iXYZ,ioXYZ->oXYZ", x_hat, w)  
@@ -89,12 +85,10 @@ class Deconv3dBlock(eqx.Module):
     def __init__(self, in_channels: int, out_channels: int, *, key):
         self.deconv = eqx.nn.ConvTranspose3d(in_channels, out_channels, kernel_size=4, stride=2, padding=1, use_bias=True, key=key)
 
-
     def __call__(self, x: jnp.ndarray):
         x = self.deconv(x)
         x = jax.nn.leaky_relu(x, negative_slope=0.1)
         return x
-
 
 
 class U_net(eqx.Module):
@@ -140,7 +134,6 @@ class U_net(eqx.Module):
     
 
 class UFNO3d(eqx.Module):
-    #conv1: SimpleBlock3d
     in_channels: int
     out_channels: int
     width: int
@@ -158,7 +151,6 @@ class UFNO3d(eqx.Module):
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.num_layers = num_layers
-        #self.conv1 = SimpleBlock3d(in_channels, out_channels, modes_x, modes_y, modes_z, width, p_do, key=key)
         keys = jax.random.split(key, 4)
         self.width = width
         self.fc0   = eqx.nn.Linear(self.in_channels, width, key=keys[0]) 
@@ -188,8 +180,6 @@ class UFNO3d(eqx.Module):
         else:
             keys = jax.random.split(key, self.num_layers)  
 
-        
-        
         x = jax.vmap(jax.vmap(jax.vmap(self.fc0, in_axes=0), in_axes=0), in_axes=0)(x)
         x = jnp.transpose(x, (3, 0, 1, 2))
 
@@ -201,7 +191,6 @@ class UFNO3d(eqx.Module):
             x = jax.nn.relu(x)
 
         x = jnp.transpose(x, (1, 2, 3, 0)) 
-
         x = jax.vmap(jax.vmap(jax.vmap(self.fc1, in_axes=0), in_axes=0), in_axes=0)(x)
         x = jax.nn.relu(x)
         x = jax.vmap(jax.vmap(jax.vmap(self.fc2, in_axes=0), in_axes=0), in_axes=0)(x)        

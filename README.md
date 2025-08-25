@@ -29,7 +29,7 @@ We developed two UFNO-based surrogate models for the simulation of three-dimensi
 To clone this git use the following command:
 
 ```bash
-git clone https://github.com/your-anonymous-id/Astro_RT.git
+git clone https://github.com/RuneRost/Astro-RT.git
 cd Astro_RT
 ```
 
@@ -159,8 +159,8 @@ The following summarizes the performance of our models on the test set:
 
 | Model name           | Speedup         | Absolute relative error |
 |----------------------|-----------------|-------------------------|
-| Steady-State Model   |     ~200x       |      2.4%               |
-| Recurrent Model      |     ~200x       |      3.7%               |
+| Steady-State Model   |     ~10,000x    |      2.6%               |
+| Recurrent Model      |     ~600x       |      2.8%               |
 
 
 The models achieves a speedup of more than 2 orders of magnitude while maintaining an average relative error below 4%. Additional results and analysis can be found in the appendix of the Paper.
@@ -168,24 +168,8 @@ The models achieves a speedup of more than 2 orders of magnitude while maintaini
 
 ## Contributing
 
->📋  Pick a licence and describe how to contribute to your code repository. 
+This repository is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+See the [LICENSE](./LICENSE) file for details.
 
 
-Todo:
-- requirements ergänzen + 
-- bei architecturen nochmal die Referenz von ufno citen - also vllt link noch in beide files rein + 
-- preprocessing einmal laufen lassen und für bei szenarien train, val und test speichern (und parameter für preprocessing angeben) +
-- in train datei, bei printen von loss sagen, welcher + 
-- vllt in train extra-fkt für evaluation also statt in der optuna-study -> mach ich in evaluate +
-- passt es, dass evaluation bei training dabei? -> mache ich extra -> noch in readme ergänzen, also doch evaluate und da sagen, dass damit alle plots + 
-- Datasets bei Zenodo -> in readme ergänzen +
 
-- License hier in readme
-- Lorenzos git richtig citen 
-- testen, ob datasets korrekt
-- Zeiten für prediction nochmal messen und dann time sachen aus train removen -> nochmal besprechen, wie Messzeit angeben
-- gucken, ob bei time-dep wirklich pixel gleich 0 (sollte ja in preprocessed geben) und gucken, ob pixel rausnehmen die kleiner als e-3 oder so
-
-
-bilder einfügen
-1e6 bei histoachsen größer

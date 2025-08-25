@@ -3,7 +3,6 @@
 import jax
 import jax.numpy as jnp
 import equinox as eqx
-from jax import vmap
 
 class Conv3dBlock(eqx.Module):
     conv: eqx.nn.Conv3d
@@ -29,12 +28,10 @@ class Deconv3dBlock(eqx.Module):
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int, stride: int, padding: int,*, key):
         self.deconv = eqx.nn.ConvTranspose3d(in_channels, out_channels, kernel_size=kernel_size, stride= stride, padding=padding, use_bias=True, key=key)
 
-
     def __call__(self, x: jnp.ndarray):
         x = self.deconv(x)
         x = jax.nn.leaky_relu(x, negative_slope=0.1)
         return x
-
 
 
 class U_net(eqx.Module):
@@ -75,7 +72,6 @@ class U_net(eqx.Module):
         self.deconv2 = Deconv3dBlock(output_channels*2, output_channels, kernel_size=2, stride=2, padding=0, key=keys[12]) 
         self.deconv1 = Deconv3dBlock(output_channels*2, output_channels, kernel_size=2, stride=2, padding=0, key=keys[13])
         self.deconv0 = Deconv3dBlock(output_channels*2, output_channels, kernel_size=2, stride=2, padding=0, key=keys[14])
-
         self.output_layer1 = eqx.nn.Conv3d(input_channels*2, input_channels*2, kernel_size=2, stride=1, padding=1, use_bias=True, key=keys[15])
         self.output_layer2 = eqx.nn.Conv3d(input_channels*2, output_channels, kernel_size=2, stride=1, padding=0, use_bias=True, key=keys[16])
 
@@ -113,7 +109,6 @@ class SpectralConv3d(eqx.Module):
     modes_y: int
     modes_z: int
     
-
     def __init__(self, in_channels, out_channels, modes_x, modes_y, modes_z, *, key):
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -132,7 +127,6 @@ class SpectralConv3d(eqx.Module):
         self.imag_weights3 = jax.random.uniform(keys[5], (in_channels, out_channels, modes_x, modes_y, modes_z), minval=-scale, maxval=+scale)  
         self.real_weights4 = jax.random.uniform(keys[6], (in_channels, out_channels, modes_x, modes_y, modes_z), minval=-scale, maxval=+scale)
         self.imag_weights4 = jax.random.uniform(keys[7], (in_channels, out_channels, modes_x, modes_y, modes_z), minval=-scale, maxval=+scale)  
-
 
     def complex_mult3d(self, x_hat, w):
         return jnp.einsum("iXYZ,ioXYZ->oXYZ", x_hat, w)  
@@ -156,7 +150,6 @@ class SpectralConv3d(eqx.Module):
         return out
     
 class UFNO3d(eqx.Module):
-    #conv1: SimpleBlock3d
     in_channels: int
     out_channels: int
     width: int
@@ -184,7 +177,6 @@ class UFNO3d(eqx.Module):
         self.spectral_convs = []
         self.bypass_convs = []
         self.unets =[]
-
         splitkey = keys[4]
         for i in range(self.num_layers):
             key1, key2, key3, splitkey = jax.random.split(splitkey, 4)  
@@ -192,7 +184,6 @@ class UFNO3d(eqx.Module):
             self.bypass_convs.append(eqx.nn.Conv1d(width, width, kernel_size=1, key=key2))
             self.unets.append(U_net(width, width, p_do, key=key3))
     
-
     def __call__(self, x, key=None, deterministic=False):
         channels, spatial_points_x, spatial_points_y, spatial_points_z = x.shape
         x = jnp.transpose(x, (1, 2, 3, 0))
@@ -213,7 +204,7 @@ class UFNO3d(eqx.Module):
             x3 = self.unets[i](x, key=keys[i], deterministic=deterministic)
             x = x1 + x2 + x3
             x = jax.nn.relu(x)
-        
+
         x = jnp.transpose(x, (1, 2, 3, 0)) 
         x = jax.vmap(jax.vmap(jax.vmap(self.fc1, in_axes=0), in_axes=0), in_axes=0)(x)
         x = jax.nn.relu(x)
