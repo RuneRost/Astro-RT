@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "4"
 os.environ["OMP_NUM_THREADS"] = "12"
 os.environ["MKL_NUM_THREADS"] = "12"
 os.environ["OPENBLAS_NUM_THREADS"] = "12"
@@ -101,11 +101,11 @@ def evaluate(inputs_test, outputs_test):
     filenames_true = []
     fig, ax = plt.subplots(figsize=(30, 30)) 
     im = ax.imshow(inputs_test[18, 2, :, :, 64//2], origin='lower', cmap='inferno',  vmin=0, vmax=1)
-    ax.set_xlabel("X", fontsize=90)
-    ax.set_ylabel("Y", fontsize=90)
+    ax.set_xlabel("x", fontsize=130)
+    ax.set_ylabel("y", fontsize=130)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
     plt.tight_layout()
     filename = 'true_XY_init.png'
     plt.savefig(filename, bbox_inches='tight')
@@ -115,18 +115,18 @@ def evaluate(inputs_test, outputs_test):
     for step in range(9):  
         fig, ax = plt.subplots(figsize=(30, 30)) 
         im = ax.imshow(outputs_test[18 + step, 0, :, :, 64//2], origin='lower', cmap='inferno',  vmin=0, vmax=1)
-        ax.set_xlabel("X", fontsize=90)
-        ax.set_ylabel("Y", fontsize=90)
+        ax.set_xlabel("x", fontsize=130)
+        ax.set_ylabel("y", fontsize=130)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
         plt.tight_layout()
         filename = f'true_XY_{step:03d}.png'
         plt.savefig(filename, bbox_inches='tight')
         filenames_true.append(filename)
         plt.close()
 
-    gif_filename = 'plots/true_XY.gif'
+    gif_filename = 'true_XY.gif'
     with imageio.get_writer(gif_filename, mode='I', duration=10.0, loop = 0) as writer:
         for filename in filenames_true:
             image = imageio.imread(filename)
@@ -135,11 +135,11 @@ def evaluate(inputs_test, outputs_test):
     filenames_pred = []
     fig, ax = plt.subplots(figsize=(30, 30))
     im = ax.imshow(inputs_test[18, 2, :, :, 64//2], origin='lower', cmap='inferno',  vmin=0, vmax=1) # timestep 1
-    ax.set_xlabel("X", fontsize=90)
-    ax.set_ylabel("Y", fontsize=90)
+    ax.set_xlabel("x", fontsize=130)
+    ax.set_ylabel("y", fontsize=130)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
     plt.tight_layout()
     filename = 'pred_XY_init.png'
     plt.savefig(filename, bbox_inches='tight')
@@ -153,18 +153,18 @@ def evaluate(inputs_test, outputs_test):
         input = input.at[2,:,:,:].set(output[0,:,:,:])
         fig, ax = plt.subplots(figsize=(30, 30))
         im = ax.imshow(output[0,:,:,64//2], origin='lower', cmap='inferno',  vmin=0, vmax=1)
-        ax.set_xlabel("X", fontsize=90)
-        ax.set_ylabel("Y", fontsize=90)
+        ax.set_xlabel("x", fontsize=130)
+        ax.set_ylabel("y", fontsize=130)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
         plt.tight_layout()
         filename = f'pred_XY_{step:03d}.png'
         plt.savefig(filename, bbox_inches='tight')
         filenames_pred.append(filename)
         plt.close()
     
-    gif_filename = 'plots/pred_XY.gif'
+    gif_filename = 'pred_XY.gif'
     with imageio.get_writer(gif_filename, mode='I', duration=10.0, loop = 0) as writer:
         for filename in filenames_pred:
             image = imageio.imread(filename)
@@ -173,11 +173,12 @@ def evaluate(inputs_test, outputs_test):
     filenames_res = []
     fig, ax = plt.subplots(figsize=(30, 30))
     im = ax.imshow(inputs_test[18, 2, :, :, 64//2] - inputs_test[18, 2, :, :, 64//2], origin='lower', cmap='coolwarm',  vmin=-0.2, vmax=0.2) # timestep 1
-    ax.set_xlabel("X", fontsize=90)
-    ax.set_ylabel("Y", fontsize=90)
+    ax.set_xlabel("x", fontsize=130)
+    ax.set_ylabel("y", fontsize=130)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
+    plt.tight_layout()
     plt.tight_layout()
     filename = f'res_XY_init.png'
     plt.savefig(filename, bbox_inches='tight')
@@ -190,18 +191,18 @@ def evaluate(inputs_test, outputs_test):
         input = input.at[2,:,:,:].set(output[0,:,:,:])
         fig, ax = plt.subplots(figsize=(30, 30))
         im = ax.imshow(output[0,:,:,64//2] - outputs_test[18 + step, 0, :, :, 64//2], origin='lower', cmap='coolwarm',  vmin=-0.2, vmax=0.2)
-        ax.set_xlabel("X", fontsize=90)
-        ax.set_ylabel("Y", fontsize=90)
+        ax.set_xlabel("x", fontsize=130)
+        ax.set_ylabel("y", fontsize=130)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
         plt.tight_layout()
         filename = f'res_XY_{step:03d}.png'
         plt.savefig(filename, bbox_inches='tight')
         filenames_res.append(filename)
         plt.close()
     
-    gif_filename = 'plots/res_XY.gif'
+    gif_filename = 'res_XY.gif'
     with imageio.get_writer(gif_filename, mode='I', duration=10.0, loop = 0) as writer:
         for filename in filenames_res:
             image = imageio.imread(filename)
@@ -210,11 +211,11 @@ def evaluate(inputs_test, outputs_test):
     filenames_true = []
     fig, ax = plt.subplots(figsize=(30, 30)) 
     im = ax.imshow(inputs_test[18, 2, :, 64//2, :], origin='lower', cmap='inferno',  vmin=0, vmax=1)
-    ax.set_xlabel("X", fontsize=90)
-    ax.set_ylabel("Y", fontsize=90)
+    ax.set_xlabel("X", fontsize=130)
+    ax.set_ylabel("Y", fontsize=130)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
     plt.tight_layout()
     filename = 'true_XZ_init.png'
     plt.savefig(filename, bbox_inches='tight')
@@ -224,13 +225,13 @@ def evaluate(inputs_test, outputs_test):
     for step in range(9): 
         fig, ax = plt.subplots(figsize=(30, 30)) 
         im = ax.imshow(outputs_test[18 + step, 0, :, 64//2, :], origin='lower', cmap='inferno',  vmin=0, vmax=1)
-        ax.set_xlabel("X", fontsize=90)
-        ax.set_ylabel("Y", fontsize=90)
+        ax.set_xlabel("x", fontsize=130)
+        ax.set_ylabel("y", fontsize=130)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
         plt.tight_layout()
-        filename = f'true_XZ_{step:03d}.pnf'
+        filename = f'true_XZ_{step:03d}.png'
         plt.savefig(filename, bbox_inches='tight')
         filenames_true.append(filename)
         plt.close()
@@ -244,11 +245,11 @@ def evaluate(inputs_test, outputs_test):
     filenames_pred = []
     fig, ax = plt.subplots(figsize=(30, 30))
     im = ax.imshow(inputs_test[18, 2, :, 64//2, :], origin='lower', cmap='inferno',  vmin=0, vmax=1) # timestep 1
-    ax.set_xlabel("X", fontsize=90)
-    ax.set_ylabel("Y", fontsize=90)
+    ax.set_xlabel("x", fontsize=130)
+    ax.set_ylabel("y", fontsize=130)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
     plt.tight_layout()
     filename = 'pred_XZ_init.png'
     plt.savefig(filename, bbox_inches='tight')
@@ -261,11 +262,11 @@ def evaluate(inputs_test, outputs_test):
         input = input.at[2,:,:,:].set(output[0,:,:,:])
         fig, ax = plt.subplots(figsize=(30, 30))
         im = ax.imshow(output[0,:,64//2,:], origin='lower', cmap='inferno',  vmin=0, vmax=1)
-        ax.set_xlabel("X", fontsize=90)
-        ax.set_ylabel("Y", fontsize=90)
+        ax.set_xlabel("x", fontsize=130)
+        ax.set_ylabel("y", fontsize=130)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
         plt.tight_layout()
         filename = f'pred_XZ_{step:03d}.png'
         plt.savefig(filename, bbox_inches='tight')
@@ -281,11 +282,11 @@ def evaluate(inputs_test, outputs_test):
     filenames_res = []
     fig, ax = plt.subplots(figsize=(30, 30))
     im = ax.imshow(inputs_test[18, 2, :, 64//2, :] - inputs_test[18, 2, :, 64//2, :], origin='lower', cmap='coolwarm',  vmin=-0.2, vmax=0.2) # timestep 1
-    ax.set_xlabel("X", fontsize=90)
-    ax.set_ylabel("Y", fontsize=90)
+    ax.set_xlabel("x", fontsize=130)
+    ax.set_ylabel("y", fontsize=130)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
     plt.tight_layout()
     filename = f'res_XZ_init.png'
     plt.savefig(filename, bbox_inches='tight')
@@ -298,11 +299,11 @@ def evaluate(inputs_test, outputs_test):
         input = input.at[2,:,:,:].set(output[0,:,:,:])
         fig, ax = plt.subplots(figsize=(30, 30))
         im = ax.imshow(output[0,:,64//2,:] - outputs_test[18 + step, 0, :, 64//2, :], origin='lower', cmap='coolwarm',  vmin=-0.2, vmax=0.2)
-        ax.set_xlabel("X", fontsize=90)
-        ax.set_ylabel("Y", fontsize=90)
+        ax.set_xlabel("x", fontsize=130)
+        ax.set_ylabel("y", fontsize=130)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
         plt.tight_layout()
         filename = f'res_XZ_{step:03d}.png'
         plt.savefig(filename, bbox_inches='tight')
@@ -318,11 +319,11 @@ def evaluate(inputs_test, outputs_test):
     filenames_true = []
     fig, ax = plt.subplots(figsize=(30, 30)) 
     im = ax.imshow(inputs_test[18, 2, 64//2, :, :], origin='lower', cmap='inferno',  vmin=0, vmax=1)
-    ax.set_xlabel("X", fontsize=90)
-    ax.set_ylabel("Y", fontsize=90)
+    ax.set_xlabel("x", fontsize=130)
+    ax.set_ylabel("y", fontsize=130)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
     plt.tight_layout()
     filename = 'true_YZ_init.png'
     plt.savefig(filename, bbox_inches='tight')
@@ -332,11 +333,11 @@ def evaluate(inputs_test, outputs_test):
     for step in range(9):  
         fig, ax = plt.subplots(figsize=(30, 30)) 
         im = ax.imshow(outputs_test[18 + step, 0, 64//2, :, :], origin='lower', cmap='inferno',  vmin=0, vmax=1)
-        ax.set_xlabel("X", fontsize=90)
-        ax.set_ylabel("Y", fontsize=90)
+        ax.set_xlabel("x", fontsize=130)
+        ax.set_ylabel("y", fontsize=130)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
         plt.tight_layout()
         filename = f'true_YZ_{step:03d}.png'
         plt.savefig(filename, bbox_inches='tight')
@@ -352,11 +353,11 @@ def evaluate(inputs_test, outputs_test):
     filenames_pred = []
     fig, ax = plt.subplots(figsize=(30, 30))
     im = ax.imshow(inputs_test[18, 2, 64//2, :, :], origin='lower', cmap='inferno',  vmin=0, vmax=1) # timestep 1
-    ax.set_xlabel("X", fontsize=90)
-    ax.set_ylabel("Y", fontsize=90)
+    ax.set_xlabel("x", fontsize=130)
+    ax.set_ylabel("y", fontsize=130)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
     plt.tight_layout()
     filename = 'pred_YZ_init.png'
     plt.savefig(filename, bbox_inches='tight')
@@ -369,11 +370,11 @@ def evaluate(inputs_test, outputs_test):
         input = input.at[2,:,:,:].set(output[0,:,:,:])
         fig, ax = plt.subplots(figsize=(30, 30))
         im = ax.imshow(output[0,64//2,:,:], origin='lower', cmap='inferno',  vmin=0, vmax=1)
-        ax.set_xlabel("X", fontsize=90)
-        ax.set_ylabel("Y", fontsize=90)
+        ax.set_xlabel("x", fontsize=130)
+        ax.set_ylabel("y", fontsize=130)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
         plt.tight_layout()
         filename = f'pred_YZ_{step:03d}.png'
         plt.savefig(filename, bbox_inches='tight')
@@ -389,11 +390,11 @@ def evaluate(inputs_test, outputs_test):
     filenames_res = []
     fig, ax = plt.subplots(figsize=(30, 30))
     im = ax.imshow(inputs_test[18, 2, 64//2, :, :] - inputs_test[18, 2, 64//2, :, :], origin='lower', cmap='coolwarm',  vmin=-0.2, vmax=0.2) # timestep 1
-    ax.set_xlabel("X", fontsize=90)
-    ax.set_ylabel("Y", fontsize=90)
+    ax.set_xlabel("x", fontsize=130)
+    ax.set_ylabel("y", fontsize=130)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+    ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
     plt.tight_layout()
     filename = f'res_YZ_init.png'
     plt.savefig(filename, bbox_inches='tight')
@@ -406,11 +407,11 @@ def evaluate(inputs_test, outputs_test):
         input = input.at[2,:,:,:].set(output[0,:,:,:])
         fig, ax = plt.subplots(figsize=(30, 30))
         im = ax.imshow(output[0,64//2,:,:] - outputs_test[18 + step, 0, 64//2, :, :], origin='lower', cmap='coolwarm',  vmin=-0.2, vmax=0.2)
-        ax.set_xlabel("X", fontsize=90)
-        ax.set_ylabel("Y", fontsize=90)
+        ax.set_xlabel("x", fontsize=130)
+        ax.set_ylabel("y", fontsize=130)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
+        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
         plt.tight_layout()
         filename = f'res_YZ_{step:03d}.png'
         plt.savefig(filename, bbox_inches='tight')
@@ -432,7 +433,7 @@ def evaluate(inputs_test, outputs_test):
     cbar = fig.colorbar(sm, cax=ax)
     cbar.set_ticks([0.0, 0.5, 1.0])
     cbar.ax.tick_params(labelsize=24)
-    plt.savefig("colorbar_num.pdf", bbox_inches=None, pad_inches=0.0)
+    plt.savefig("colorbar_num.png", bbox_inches=None, pad_inches=0.0)
     plt.close(fig)
 
     cmap = plt.get_cmap("inferno")
@@ -444,17 +445,17 @@ def evaluate(inputs_test, outputs_test):
     cbar = fig.colorbar(sm, cax=ax)
     cbar.set_ticks([0.0, 0.5, 1.0])
     cbar.ax.tick_params(labelsize=24)
-    plt.savefig("colorbar_pred.pdf", bbox_inches=None, pad_inches=0.0)
+    plt.savefig("colorbar_pred.png", bbox_inches=None, pad_inches=0.0)
     plt.close(fig)
 
     cmap = plt.get_cmap("coolwarm")
-    norm = matplotlib.colors.Normalize(vmin=-0.3, vmax=0.3)
+    norm = matplotlib.colors.Normalize(vmin=-0.2, vmax=0.2)
     sm = matplotlib.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])  
     fig = plt.figure(figsize=(2, 8)) 
     ax = fig.add_axes([0.15, 0.05, 0.2, 0.9])
     cbar = fig.colorbar(sm, cax=ax)
-    cbar.set_ticks([-0.3, 0.0, 0.3])
+    cbar.set_ticks([-0.2, 0.0, 0.2])
     cbar.ax.tick_params(labelsize=24)
     cbar.set_label(r"$\text{Prediction} - \text{Reference}$", fontsize=30)
     plt.savefig("colorbar_res.pdf") 
@@ -466,8 +467,8 @@ def evaluate(inputs_test, outputs_test):
     output_6 = outputs_test[18+6, :, :, :, :] * (yp_max[:, None, None, None] - yp_min[:, None, None, None]) + yp_min[:, None, None, None]
 
     im0 = axes[0].imshow(inputs[0, :, :, 64//2], origin='lower', cmap='viridis') 
-    axes[0].set_xlabel("X", fontsize=36)
-    axes[0].set_ylabel("Y", fontsize=36)
+    axes[0].set_xlabel("x", fontsize=36)
+    axes[0].set_ylabel("y", fontsize=36)
     axes[0].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[0].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[0].tick_params(axis='both', which='major',  length=20, width=3, labelsize=24)
@@ -479,8 +480,8 @@ def evaluate(inputs_test, outputs_test):
     cb.ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
     im1 = axes[1].imshow(inputs[1, :, :, 64//2], origin='lower', cmap='viridis') 
-    axes[1].set_xlabel("X", fontsize=36)
-    axes[1].set_ylabel("Y", fontsize=36)
+    axes[1].set_xlabel("x", fontsize=36)
+    axes[1].set_ylabel("y", fontsize=36)
     axes[1].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].tick_params(axis='both', which='major',  length=20, width=3, labelsize=24)
@@ -492,8 +493,8 @@ def evaluate(inputs_test, outputs_test):
     cb.ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
     im2 = axes[2].imshow(output_5[0, :, :, 64//2], origin='lower', cmap='inferno')
-    axes[2].set_xlabel("X", fontsize=36)
-    axes[2].set_ylabel("Y", fontsize=36)
+    axes[2].set_xlabel("x", fontsize=36)
+    axes[2].set_ylabel("y", fontsize=36)
     axes[2].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[2].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[2].tick_params(axis='both', which='major',  length=20, width=3, labelsize=24)
@@ -505,8 +506,8 @@ def evaluate(inputs_test, outputs_test):
     cb.ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
     im3 = axes[3].imshow(output_6[0, :, :, 64//2], origin='lower', cmap='inferno') #,  vmin=-8, vmax=7) 
-    axes[3].set_xlabel("X", fontsize=36)
-    axes[3].set_ylabel("Y", fontsize=36)
+    axes[3].set_xlabel("x", fontsize=36)
+    axes[3].set_ylabel("y", fontsize=36)
     axes[3].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[3].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[3].tick_params(axis='both', which='major',  length=20, width=3, labelsize=24)
@@ -559,9 +560,9 @@ def evaluate(inputs_test, outputs_test):
         ax.set_yticks([100000, 200000, 300000, 400000, 500000])
         ax.set_xticks([-0.2, -0.1, 0.0, 0.1, 0.2])
         ax.hist(residuals_flat[i], bins=100, alpha=0.8, range=(-0.2, 0.2)) 
-        ax.set_xlabel('Relative prediction error', fontsize=64)
-        ax.set_ylabel("Number of pixels", fontsize=64)
-        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=48)
+        ax.set_xlabel('Relative prediction error', fontsize=90)
+        ax.set_ylabel("Number of pixels", fontsize=90)
+        ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=60)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
         plt.tight_layout()

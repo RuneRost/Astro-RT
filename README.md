@@ -43,7 +43,7 @@ In our paper we consider two scenarios in which we want to emulate Radiative Tra
 1. Prediction of steady-state radiative intensity setting in for $t \to \infty$ 
 2. Temporal evolution of radiative intensity from a starting point where $I_0=0$
 
-To train and evaluate a steady-state model we provide a dataset consisting of samples, that each comprise an absorption and emission field as well as the corresponding steady-state radiative intensity. These are generated using the code from [here](https://github.com/lorenzobranca/Ray-trax).
+To train and evaluate a steady-state model we provide a dataset consisting of samples, that each comprise an absorption and emission field as well as the corresponding steady-state radiative intensity. These are generated using the code from [here](https://anonymous.4open.science/r/Ray-trax-3F2E/).
 
 To train a steady-state model, run this command:
 
@@ -56,7 +56,7 @@ If you would like to test the performance of our pretrained model, please commen
 
 
 
-To train and evaluate a model for the prediction of temporal evolution of readiative intensity we provide a training, validation and test set, each consisting of samples, that comprise an absorption and emission field as well as two consectuive snapshots of the temporal evolution of the corresponding radiative intensity. These samples were also generated using the code from [here](https://github.com/lorenzobranca/Ray-trax) and further split into training, validation and test set using the code that is currently commented out at the end of the file. 
+To train and evaluate a model for the prediction of temporal evolution of readiative intensity we provide a training, validation and test set, each consisting of samples, that comprise an absorption and emission field as well as two consectuive snapshots of the temporal evolution of the corresponding radiative intensity. These samples were also generated using the code from [here](https://anonymous.4open.science/r/Ray-trax-3F2E/) and further split into training, validation and test set using the code that is currently commented out at the end of the file. 
 
 To train a model for the temporal evolution, run this command:
 
@@ -126,7 +126,7 @@ Datasets for both scenarios can be downloaded from Zenodo:
 
 - Dataset for temporal evolution of radiative intensity: [https://zenodo.org/records/16928552](https://zenodo.org/records/16928552)
 
-Alternatively you can create your own dataset using the code form [here](https://github.com/lorenzobranca/Ray-trax).
+Alternatively you can create your own dataset using the code form [here](https://anonymous.4open.science/r/Ray-trax-3F2E/).
 
 
 ## Results

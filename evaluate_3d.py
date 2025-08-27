@@ -123,8 +123,8 @@ def evaluate():
     fig, axes = plt.subplots(1, 3, figsize=(30, 30))
 
     im0 = axes[0].imshow(outputs_test[0, 0, :, :, 64//2], origin='lower', cmap='inferno',  vmin=0, vmax=1) 
-    axes[0].set_xlabel("X", fontsize=30)
-    axes[0].set_ylabel("Y", fontsize=30)
+    axes[0].set_xlabel("x", fontsize=30)
+    axes[0].set_ylabel("y", fontsize=30)
     axes[0].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[0].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[0].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
@@ -132,8 +132,8 @@ def evaluate():
     cb.ax.tick_params(labelsize=24) 
 
     im1 = axes[1].imshow(model(inputs_test[0, :, :, :, :], deterministic=True)[0, :, :, 64//2], origin='lower', cmap='inferno',  vmin=0, vmax=1) 
-    axes[1].set_xlabel("X", fontsize=30)
-    axes[1].set_ylabel("Y", fontsize=30)
+    axes[1].set_xlabel("x", fontsize=30)
+    axes[1].set_ylabel("y", fontsize=30)
     axes[1].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
@@ -141,8 +141,8 @@ def evaluate():
     cb.ax.tick_params(labelsize=24) 
 
     im2 = axes[2].imshow(model(inputs_test[0, :, :, :, :], deterministic=True)[0, :, :, 64//2] - outputs_test[0, 0, :, :, 64//2], origin='lower', cmap='coolwarm', vmin=-0.15, vmax=0.15) 
-    axes[2].set_xlabel("X", fontsize=30)
-    axes[2].set_ylabel("Y", fontsize=30)
+    axes[2].set_xlabel("x", fontsize=30)
+    axes[2].set_ylabel("y", fontsize=30)
     axes[2].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[2].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[2].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
@@ -158,16 +158,16 @@ def evaluate():
     fig, axes = plt.subplots(1, 3, figsize=(30, 30))
 
     im0 = axes[0].imshow(outputs_test[0, 0, :, 64//2, :], origin='lower', cmap='inferno',  vmin=0, vmax=1) 
-    axes[0].set_xlabel("X", fontsize=30)
-    axes[0].set_ylabel("Y", fontsize=30)
+    axes[0].set_xlabel("x", fontsize=30)
+    axes[0].set_ylabel("y", fontsize=30)
     axes[0].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[0].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
     cb = fig.colorbar(im0, ax=axes[0], fraction=0.046, pad=0.04)
     cb.ax.tick_params(labelsize=24) 
 
     im1 = axes[1].imshow(model(inputs_test[0, :, :, :, :], deterministic=True)[0, :, 64//2, :], origin='lower', cmap='inferno',  vmin=0, vmax=1) 
-    axes[1].set_xlabel("X", fontsize=30)
-    axes[1].set_ylabel("Y", fontsize=30)
+    axes[1].set_xlabel("x", fontsize=30)
+    axes[1].set_ylabel("y", fontsize=30)
     axes[1].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
@@ -175,8 +175,8 @@ def evaluate():
     cb.ax.tick_params(labelsize=24) 
 
     im2 = axes[2].imshow(model(inputs_test[0, :, :, :, :], deterministic=True)[0, :, 64//2, :] - outputs_test[0, 0, :, 64//2, :], origin='lower', cmap='coolwarm', vmin=-0.15, vmax=0.15) 
-    axes[2].set_xlabel("X", fontsize=30)
-    axes[2].set_ylabel("Y", fontsize=30)
+    axes[2].set_xlabel("x", fontsize=30)
+    axes[2].set_ylabel("y", fontsize=30)
     axes[1].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[2].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
@@ -191,8 +191,8 @@ def evaluate():
     fig, axes = plt.subplots(1, 3, figsize=(30, 30))
 
     im0 = axes[0].imshow(outputs_test[0, 0, 64//2, :, :], origin='lower', cmap='inferno',  vmin=0, vmax=1) 
-    axes[0].set_xlabel("X", fontsize=30)
-    axes[0].set_ylabel("Y", fontsize=30)
+    axes[0].set_xlabel("x", fontsize=30)
+    axes[0].set_ylabel("y", fontsize=30)
     axes[0].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[0].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[0].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
@@ -201,8 +201,8 @@ def evaluate():
 
 
     im1 = axes[1].imshow(model(inputs_test[0, :, :, :, :], deterministic=True)[0, 64//2, :, :], origin='lower', cmap='inferno',  vmin=0, vmax=1) 
-    axes[1].set_xlabel("X", fontsize=30)
-    axes[1].set_ylabel("Y", fontsize=30)
+    axes[1].set_xlabel("x", fontsize=30)
+    axes[1].set_ylabel("y", fontsize=30)
     axes[1].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
@@ -210,8 +210,8 @@ def evaluate():
     cb.ax.tick_params(labelsize=24) 
 
     im2 = axes[2].imshow(model(inputs_test[0, :, :, :, :], deterministic=True)[0, 64//2, :, :] - outputs_test[0, 0, 64//2, :, :], origin='lower', cmap='coolwarm', vmin=-0.15, vmax=0.15) 
-    axes[2].set_xlabel("X", fontsize=30)
-    axes[2].set_ylabel("Y", fontsize=30)
+    axes[2].set_xlabel("x", fontsize=30)
+    axes[2].set_ylabel("y", fontsize=30)
     axes[2].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[2].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[2].tick_params(axis='both', which='major',  length=20, width=3, labelsize=30)
@@ -251,8 +251,8 @@ def evaluate():
     fig, axes = plt.subplots(1, 3, figsize=(30, 30))
     unpreprocessed = inputs_test[0,:,:,:,:] * (xp_max[:, None, None, None] - xp_min[:, None, None, None]) + xp_min[:, None, None, None]
     im0 = axes[0].imshow(unpreprocessed[0, :, :, 64//2], origin='lower', cmap='viridis') #,  vmin=-2, vmax=1.5) 
-    axes[0].set_xlabel("X", fontsize=36)
-    axes[0].set_ylabel("Y", fontsize=36)
+    axes[0].set_xlabel("x", fontsize=36)
+    axes[0].set_ylabel("y", fontsize=36)
 
     axes[0].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[0].yaxis.set_major_locator(MaxNLocator(nbins=5))
@@ -267,8 +267,8 @@ def evaluate():
 
     unpreprocessed = inputs_test[0,:,:,:,:] * (xp_max[:, None, None, None] - xp_min[:, None, None, None]) + xp_min[:, None, None, None]
     im1 = axes[1].imshow(unpreprocessed[1, :, :, 64//2], origin='lower', cmap='viridis') #,  vmin=2.5, vmax=5) 
-    axes[1].set_xlabel("X", fontsize=36)
-    axes[1].set_ylabel("Y", fontsize=36)
+    axes[1].set_xlabel("x", fontsize=36)
+    axes[1].set_ylabel("y", fontsize=36)
     axes[1].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[1].tick_params(axis='both', which='major',  length=20, width=3, labelsize=24)
@@ -281,8 +281,8 @@ def evaluate():
 
     unpreprocessed  = outputs_test[0,:,:,:,:] * (yp_max[:, None, None, None] - yp_min[:, None, None, None]) + yp_min[:, None, None, None]
     im2 = axes[2].imshow(unpreprocessed[0, :, :, 64//2], origin='lower', cmap='inferno') #, vmin=-2.5, vmax=5.5) 
-    axes[2].set_xlabel("X", fontsize=36)
-    axes[2].set_ylabel("Y", fontsize=36)
+    axes[2].set_xlabel("x", fontsize=36)
+    axes[2].set_ylabel("y", fontsize=36)
     axes[2].xaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[2].yaxis.set_major_locator(MaxNLocator(nbins=5))
     axes[2].tick_params(axis='both', which='major',  length=20, width=3, labelsize=24)
