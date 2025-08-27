@@ -72,8 +72,8 @@ Optimal hyperparameters for the steady-state model and its training:
 | Model hyperparameters | Value          | Training hyperparameters   | Value      | 
 |-----------------------|----------------|----------------------------|------------|
 | Number of Layers      |    6           |   Initial Learning Rate    |   0.0005   | 
-| Layer Width           |    16          |   Decay Rate               |   0.9      | 
-| Number of Modes       |    4           |   Weight Decay             |   0.005    | 
+| Layer Width           |    16          |   Decay Rate               |   0.9000   | 
+| Number of Modes       |    4           |   Weight Decay             |   0.0050   | 
 | U-Net Kernel Size     |    3           |   Dropout Probability      |   0.08     |  
 | U-Net Width           |    16          |   $\lambda$ in Loss        |   0.5      | 
 
