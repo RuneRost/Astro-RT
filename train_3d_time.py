@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["OMP_NUM_THREADS"] = "12"
 os.environ["MKL_NUM_THREADS"] = "12"
 os.environ["OPENBLAS_NUM_THREADS"] = "12"
@@ -26,21 +26,21 @@ from architectures.ufno_3d_time import UFNO3d
 def objective(trial):
     
     # define regions in which hyperparameters should be optimized -> currently commented out to use fixed values found by optimal parameter search
-    #lr_start        = trial.suggest_float("lr_start", 3e-4, 7e-4, log=True)
-    #dr              = trial.suggest_float("decay_rate", 0.87, 0.93)
-    #wd              = trial.suggest_float("wd", 3e-4, 7e-4)
-    #p_do            = trial.suggest_categorical("p_do", [0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10])
-    #p_do            = trial.suggest_categorical("p_do", [0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10, 0.105, 0.11, 0.115, 0.12, 0.125, 0.13, 0.135, 0.14, 0.145, 0.15])
-    #modes           = 4 #trial.suggest_int("modes", 4, 8)
-    #width           = 32 #trial.suggest_int("width", 16, 32, step=4) 
+    lr_start        = trial.suggest_float("lr_start", 3e-4, 7e-4, log=True)
+    dr              = trial.suggest_float("decay_rate", 0.87, 0.93)
+    wd              = trial.suggest_float("wd", 3e-4, 7e-4)
+    p_do            = trial.suggest_categorical("p_do", [0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10])
+    p_do            = trial.suggest_categorical("p_do", [0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10, 0.105, 0.11, 0.115, 0.12, 0.125, 0.13, 0.135, 0.14, 0.145, 0.15])
+    modes           = 4 #trial.suggest_int("modes", 4, 8)
+    width           = 32 #trial.suggest_int("width", 16, 32, step=4) 
 
     #  hardcoded hyperparameters
-    lr_start        = 0.0006
-    dr              = 0.9120
-    wd              = 0.0052
-    p_do            = 0.08
-    modes           = 4 
-    width           = 32
+    #lr_start        = 0.0006
+    #dr              = 0.9120
+    #wd              = 0.0052
+    #p_do            = 0.08
+    #modes           = 4 
+    #width           = 32
     num_layers      = 6
 
     batch_size = 8
@@ -210,12 +210,13 @@ def objective(trial):
     print(f"Test Loss (Relative Loss): {test_loss:.4f}")
     
     # save best model - comment this in if you want to save your best model
-    #if not hasattr(objective, "best_loss") or test_loss < objective.best_loss:
-    #    objective.best_loss = test_loss
-    #    eqx.tree_serialise_leaves("surrogate_models/custom_ufno_3d_time.eqx", model)
+    if not hasattr(objective, "best_loss") or test_loss < objective.best_loss:
+        objective.best_loss = test_loss
+        eqx.tree_serialise_leaves("surrogate_models/custom_ufno_3d_time.eqx", model)
     
     return test_loss
-    
+
+# function to preprocess the data (loaded data is already preprocessed)
 def preprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
     if xp_min.shape == ():
         pass
@@ -232,7 +233,7 @@ def preprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
     data_y = (np.log10(data_y + 1e-8) - yp_min)/ (yp_max - yp_min)
     return data_x, data_y
 
-
+# function to unpreprocess the data
 def unpreprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
     if xp_min.shape == ():
         pass
@@ -276,7 +277,7 @@ if __name__ == "__main__":
     time1 = time.time()
     study = optuna.create_study(direction="minimize", study_name="3d-time-study")
     study.optimize(objective, n_trials=1, n_jobs=1, gc_after_trial=True, show_progress_bar=True)
+    time2 = time.time()
     print("Best parameters:", study.best_params)
     print("Validation loss of best parameters:", study.best_value)
-    time2 = time.time()
-    print(f"Total time for optimization: {time2-time1:.4f} seconds")
+    print(f"Total time for optimization: {(time2-time1)/60:.4f} minutes")

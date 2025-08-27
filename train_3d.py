@@ -22,44 +22,27 @@ import time
 from architectures.ufno_3d import UFNO3d
 
 
-# function to preprocess the data
-def preprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
-    data_x = np.log10(data_x + 1e-8)  
-    data_x = (data_x - xp_min[:, None, None, None]) / (xp_max[:, None, None, None] - xp_min[:, None, None, None])
-    data_y = np.log10(data_y + 1e-8) 
-    data_y = (data_y - yp_min[:, None, None, None]) / (yp_max[:, None, None, None] - yp_min[:, None, None, None])
-    return data_x, data_y
-
-# function to unpreprocess the data
-def unpreprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
-    data_x = data_x * (xp_max[:, None, None, None] - xp_min[:, None, None, None]) + xp_min[:, None, None, None]
-    data_x = 10**data_x - 1e-8  
-    data_y = data_y * (yp_max[:, None, None, None] - yp_min[:, None, None, None]) + yp_min[:, None, None, None]
-    data_y = 10**data_y - 1e-8  
-    return data_x, data_y
-
-
 def objective(trial):
     
     # define regions in which hyperparameters should be optimized -> currently commented out to use fixed values found by optimal parameter search
-    #lr_start        = trial.suggest_float("lr_start", 1e-3, 4e-3, log=True)
-    #dr              = trial.suggest_float("decay_rate", 0.85, 0.90)
-    #wd              = trial.suggest_float("wd", 1e-4, 5e-4)
-    #p_do            = trial.suggest_categorical("p_do", [0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10])
-    #p_do            = trial.suggest_categorical("p_do", [0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10, 0.105, 0.11, 0.115, 0.12, 0.125, 0.13, 0.135, 0.14, 0.145, 0.15])
-    #modes            = trial.suggest_int("modes", 2, 12)  # modes_x, modes_y, modes_z are the same
-    #width           = trial.suggest_int("width", 8, 64, step=8)  # width of the model
+    lr_start        = trial.suggest_float("lr_start", 1e-3, 4e-3, log=True)
+    dr              = trial.suggest_float("decay_rate", 0.85, 0.90)
+    wd              = trial.suggest_float("wd", 1e-4, 5e-4)
+    p_do            = trial.suggest_categorical("p_do", [0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10])
+    p_do            = trial.suggest_categorical("p_do", [0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10, 0.105, 0.11, 0.115, 0.12, 0.125, 0.13, 0.135, 0.14, 0.145, 0.15])
+    modes            = trial.suggest_int("modes", 2, 12)  # modes_x, modes_y, modes_z are the same
+    width           = trial.suggest_int("width", 8, 64, step=8)  # width of the model
 
     # hardcoded hyperparameters
-    lr_start = 0.0005
-    dr = 0.90
-    wd = 0.005
-    p_do = 0.08 
-    modes = 4
-    width = 16
+    #lr_start = 0.0005
+    #dr = 0.90
+    #wd = 0.005
+    #p_do = 0.08 
+    #modes = 4
+    #width = 16
     num_layers=6
 
-    num_epochs = 50
+    num_epochs = 30
     batch_size = 8 
     n_samples_train = inputs_train.shape[0]
     n_batches_train = jnp.ceil((n_samples_train/batch_size)).astype(int) 
@@ -152,7 +135,6 @@ def objective(trial):
         x, y = eqx.filter_shard((x, y), sharding)
         loss, grads = eqx.filter_value_and_grad(ufno_loss_2)(model, x, y, key, deterministic=False)   
         grad_norm = jnp.sqrt(sum(jnp.vdot(g, g) for g in jax.tree_util.tree_leaves(grads)))
-        print("Loss:", loss, "Gradientnorm:", grad_norm)
         updates, opt_state = optim.update(grads, opt_state, model)  
         model = eqx.apply_updates(model, updates)
         model, opt_state = eqx.filter_shard((model, opt_state), replicated)
@@ -224,11 +206,28 @@ def objective(trial):
     print(f"Test Loss (Relative Loss): {test_loss:.4f}")
     
     # save best model - comment this in if you want to save your best model
-    #if not hasattr(objective, "best_loss") or test_loss < objective.best_loss:
-    #    objective.best_loss = test_loss
-    #    eqx.tree_serialise_leaves("surrogate_models/custom_ufno_3d.eqx", model)
+    if not hasattr(objective, "best_loss") or test_loss < objective.best_loss:
+        objective.best_loss = test_loss
+        eqx.tree_serialise_leaves("surrogate_models/custom_ufno_3d.eqx", model)
 
     return test_loss
+
+# function to preprocess the data (loaded data is already preprocessed)
+def preprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
+    data_x = np.log10(data_x + 1e-8)  
+    data_x = (data_x - xp_min[:, None, None, None]) / (xp_max[:, None, None, None] - xp_min[:, None, None, None])
+    data_y = np.log10(data_y + 1e-8) 
+    data_y = (data_y - yp_min[:, None, None, None]) / (yp_max[:, None, None, None] - yp_min[:, None, None, None])
+    return data_x, data_y
+
+# function to unpreprocess the data
+def unpreprocess_data(data_x, data_y, xp_min, xp_max, yp_min, yp_max):
+    data_x = data_x * (xp_max[:, None, None, None] - xp_min[:, None, None, None]) + xp_min[:, None, None, None]
+    data_x = 10**data_x - 1e-8  
+    data_y = data_y * (yp_max[:, None, None, None] - yp_min[:, None, None, None]) + yp_min[:, None, None, None]
+    data_y = 10**data_y - 1e-8  
+    return data_x, data_y
+
 
    
 if __name__ == "__main__":
@@ -253,7 +252,10 @@ if __name__ == "__main__":
     print("Data has been loaded")
 
     # start the Optuna study (you can adjust the number of trials) and print out best parameters
+    t1 = time.time()
     study = optuna.create_study(direction="minimize", study_name="3d-study")
     study.optimize(objective, n_trials=1, n_jobs=1, gc_after_trial=True, show_progress_bar=True)
+    t2 = time.time()
     print("Best parameters:", study.best_params)
     print("Test loss of best parameters:", study.best_value) 
+    print("Total time for Optuna study (in minutes):", (t2-t1)/60)

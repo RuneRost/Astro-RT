@@ -609,8 +609,6 @@ if __name__ == "__main__":
         output = model(input, deterministic=True)
         input = input.at[2, :, :, :].set(output[0, :, :, :])
         return input, input   
-    
-    print(inputs_test.shape)
 
     input0 = jnp.array(inputs_test[0, :, :, :, :])
 

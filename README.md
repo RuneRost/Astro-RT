@@ -13,7 +13,7 @@ Accurate solutions require fine resolution, leading to significant challenges in
 Proposed numerical methods often suffer from high computational costs, dimensionality issues, or instability while traditional deep learning approaches often struggle with generalization across discretizations and parameter settings, as well as stability in high-dimensional PDE problems. 
 
 To address these shortcomings, we employ Neural Operators, to develop surrogate models for simulating radiative transfer. We present two Neural Operator–based surrogate models for three-dimensional radiative transfer, achieving significant speedups while maintaining high accuracy.
-We employ a specific class of Neural Operators known as the [Fourier Neural Operator](https://arxiv.org/abs/2010.08895) (FNO) and combines it with a [U-Net](https://arxiv.org/abs/1505.04597) architecture, following the approach chosen in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697). 
+These are based on a specific class of Neural Operators known as the [Fourier Neural Operator](https://arxiv.org/abs/2010.08895) (FNO) that is combined it with a [U-Net](https://arxiv.org/abs/1505.04597) architecture, following the approach chosen in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697). 
 
 <p align="center">
   <img src="plots/U-FNO-Fig.png" alt=" " width="1000">
@@ -52,11 +52,11 @@ python train_3d.py
 ```
 
 In this script ([`train_3d.py`](train_3d.py)) data is split into an independent training, validation and testset and an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below. During training the performance of the model on the validation set is assessed and after training predictions are made on the test set to evaluate the quality of the model.
-If you would like to test the performance of our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d.eqx` in the [`surrogate_models`](surrogate_models) folder. In this case you can comment out the training part (or simply set the number of trained epochs to 0)
+If you would like to test the performance of our pretrained model, please comment in the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d.eqx` in the [`surrogate_models`](surrogate_models) folder. In this case you should comment out the training part (or simply set the number of trained epochs to 0) as well as the saving procedure for the model.
 
 
 
-To train and evaluate a model for the temporal evolution we provide a training, validation and test set, each consisting of samples, that comprise an absorption and emission field as well as two consectuive snapshots of the temporal evolution of the corresponding radiative intensity. Thee samples were also generated using the code from [here](https://github.com/lorenzobranca/Ray-trax) and further split into training, validation and test set using the code that is currently commented out at the end of the file. 
+To train and evaluate a model for the prediction of temporal evolution of readiative intensity we provide a training, validation and test set, each consisting of samples, that comprise an absorption and emission field as well as two consectuive snapshots of the temporal evolution of the corresponding radiative intensity. These samples were also generated using the code from [here](https://github.com/lorenzobranca/Ray-trax) and further split into training, validation and test set using the code that is currently commented out at the end of the file. 
 
 To train a model for the temporal evolution, run this command:
 
@@ -65,10 +65,7 @@ python train_3d_time.py
 ```
 
 In this script ([`train_3d_time.py`](train_3d_time.py)) an Optuna study is run to find the best model and training hyperparameters. You can modify the script to change the intervals for the hyperparameters or the input files for training data. Alternatively, you can hardcode a set of hyperparameters. The hyperparameters used for training our surrogate models are given below. During training the performance of the model on the validation set is assessed and after training predictions are made on the test set to evaluate the quality of the model.
-If you would like to test the performance of our pretrained model, please uncomment the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d_time.eqx` in the [`surrogate_models`](surrogate_models) folder. In this case you can comment out the training part (or simply set the number of trained epochs to 0)
-
-Both architectures are build following the approach in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697).
-
+If you would like to test the performance of our pretrained model, please comment in the line for loading the model after initialization (currently commented out in the code). The pretrained model for steady-state prediction is stored as `ufno_3d_time.eqx` in the [`surrogate_models`](surrogate_models) folder. In this case you should comment out the training part (or simply set the number of trained epochs to 0) as well as the saving procedure for the model.
 
 Optimal hyperparameters for the steady-state model and its training:
 
@@ -102,7 +99,7 @@ In the code for training (and evaluation) you can change the input files to asse
 
 ## Evaluation
 
-We additionally provide two scripts with which you can recreate the plots shown in our work. Additionally these offer you to compute the loss of a chosen model on the test set.
+We additionally provide two scripts with which you can recreate the plots shown in our work. Additionally these provide you with the opportunity to compute the loss of a chosen model on the test set.
 
 - [`evaluate_3d.py`](evaluate_3d.py) allows you to create all the plots we show for the prediction of the steady state radiative intensity
 
@@ -136,7 +133,7 @@ Alternatively you can create your own dataset using the code form [here](https:/
 
 Following plots show a comparison of the predictions of our surrogate models and the preprocessed numerically computed reference, respectively for a random sample from the test set.
 
-**Emulating radiative transfer in the steady-state case:**
+***Emulating radiative transfer in the steady-state case:***
 
 The following plot shows the preprocessed numerically computed steady-state radiative intensity (left), the model prediction (middle) and the corresponding residual (right), for a random sample from the test set.
 
@@ -149,7 +146,7 @@ The predicted intensity field closely matches the numerical reference, preservin
 
 
 
-**Emulating radiative transfer in the temporal evolution case:**
+***Emulating radiative transfer in the temporal evolution case:***
 
 The following plot shows the temporal evolution of radiative intensity for a random sample from the test set, including the  preprocessed
 numerical reference (left), model prediction (middle), and corresponding residual (left). In the paper we show snapshots at selected timesteps of this evolution.
@@ -178,6 +175,3 @@ The models achieves a speedup of more than 2 orders of magnitude while maintaini
 
 This repository is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
 See the [LICENSE](./LICENSE) file for details.
-
-
-
