@@ -154,7 +154,7 @@ numerical reference (left), model prediction (middle), and corresponding residua
 <p align="center">
   <img src="plots/true_XY.gif" alt="ABCDE" width="150">
   <img src="plots/pred_XY.gif" alt="ABCDE" width="150">
-  <img src="plots/res_XY.gif" alt="ABCDE" width="171">
+  <img src="plots/res_XY.gif" alt="ABCDE" width="169">
 </p>
 
 The recurrent surrogate model accurately captures the temporal evolution of radiative intensity, with predictions closely matching reference solutions at each time step. Residuals remain low, with deviations mainly near edges around evolving structures. 
