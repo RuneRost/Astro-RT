@@ -26,20 +26,21 @@ from architectures.ufno_3d_time import UFNO3d
 def objective(trial):
     
     # define regions in which hyperparameters should be optimized -> currently commented out to use fixed values found by optimal parameter search
-    lr_start        = trial.suggest_float("lr_start", 1e-5, 1e-4, log=True)
-    dr              = trial.suggest_float("decay_rate", 0.84, 0.95)
-    wd              = trial.suggest_float("wd", 1e-4, 1e-3)
-    p_do            = trial.suggest_categorical("p_do", [0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10, 0.105, 0.11, 0.115, 0.12, 0.125, 0.13, 0.135, 0.14, 0.145, 0.15])
-    modes           = trial.suggest_int("modes", 4, 8)
-    width           = trial.suggest_int("width", 16, 32, step=4) 
+    #lr_start        = trial.suggest_float("lr_start", 1e-5, 1e-4, log=True)
+    #dr              = trial.suggest_float("decay_rate", 0.84, 0.95)
+    #wd              = trial.suggest_float("wd", 1e-4, 1e-3)
+    #p_do            = trial.suggest_categorical("p_do", [0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10, 0.105, 0.11, 0.115, 0.12, 0.125, 0.13, 0.135, 0.14, 0.145, 0.15])
+    #modes           = trial.suggest_int("modes", 4, 8)
+    #width           = trial.suggest_int("width", 16, 32, step=4) 
 
     #  hardcoded hyperparameters
-    #lr_start        = 0.0006
-    #dr              = 0.9120
-    #wd              = 0.0052
-    #p_do            = 0.08
-    #modes           = 4 
-    #width           = 32
+    lr_start        = 0.0006
+    dr              = 0.9120
+    wd              = 0.0052
+    p_do            = 0.08
+    modes           = 4 
+    width           = 32
+
     num_layers      = 6
 
     batch_size = 8
