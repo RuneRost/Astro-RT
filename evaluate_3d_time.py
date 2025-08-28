@@ -178,10 +178,6 @@ def evaluate(inputs_test, outputs_test):
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
     ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
-    cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cb.set_label(r"$\text{Prediction} - \text{Reference}$", fontsize=36)
-    cb.set_ticks([-0.2, 0.0, 0.2])
-    cb.ax.tick_params(labelsize=24)
     plt.tight_layout()
     filename = f'res_XY_init.png'
     plt.savefig(filename, bbox_inches='tight')
@@ -199,17 +195,13 @@ def evaluate(inputs_test, outputs_test):
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.tick_params(axis='both', which='major',  length=20, width=3, labelsize=90)
-        cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-        cb.set_label(r"$\text{Prediction} - \text{Reference}$", fontsize=36)
-        cb.set_ticks([-0.2, 0.0, 0.2])
-        cb.ax.tick_params(labelsize=24)
         plt.tight_layout()
         filename = f'res_XY_{step:03d}.png'
         plt.savefig(filename, bbox_inches='tight')
         filenames_res.append(filename)
         plt.close()
     
-    gif_filename = 'plots/res_XY.gif'
+    gif_filename = 'res_XY.gif'
     with imageio.get_writer(gif_filename, mode='I', duration=10.0, loop = 0) as writer:
         for filename in filenames_res:
             image = imageio.imread(filename)

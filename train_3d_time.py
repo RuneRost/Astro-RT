@@ -26,25 +26,25 @@ from architectures.ufno_3d_time import UFNO3d
 def objective(trial):
     
     # define regions in which hyperparameters should be optimized -> currently commented out to use fixed values found by optimal parameter search
-    #lr_start        = trial.suggest_float("lr_start", 1e-5, 1e-4, log=True)
-    #dr              = trial.suggest_float("decay_rate", 0.84, 0.95)
-    #wd              = trial.suggest_float("wd", 1e-4, 1e-3)
-    #p_do            = trial.suggest_categorical("p_do", [0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10, 0.105, 0.11, 0.115, 0.12, 0.125, 0.13, 0.135, 0.14, 0.145, 0.15])
-    #modes           = trial.suggest_int("modes", 4, 8)
-    #width           = trial.suggest_int("width", 16, 32, step=4) 
+    lr_start        = trial.suggest_float("lr_start", 1e-4, 1e-3, log=True)
+    dr              = trial.suggest_float("decay_rate", 0.85, 0.95)
+    wd              = trial.suggest_float("wd", 1e-4, 1e-2)
+    p_do            = trial.suggest_categorical("p_do", [0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.095, 0.10, 0.105, 0.11, 0.115, 0.12, 0.125, 0.13, 0.135, 0.14, 0.145, 0.15])
+    modes           = trial.suggest_int("modes", 2, 6)
+    width           = trial.suggest_int("width", 12, 32, step=8) 
 
     #  hardcoded hyperparameters
-    lr_start        = 0.0006
-    dr              = 0.9120
-    wd              = 0.0052
-    p_do            = 0.08
-    modes           = 4 
-    width           = 32
+    #lr_start        = 0.0006
+    #dr              = 0.9120
+    #wd              = 0.0052
+    #p_do            = 0.08
+    #modes           = 4 
+    #width           = 32
 
     num_layers      = 6
 
     batch_size = 8
-    num_epochs = 40
+    num_epochs = 20
     n_samples_train = inputs_train.shape[0]
     n_batches_train = jnp.ceil((n_samples_train/batch_size)).astype(int) 
     n_samples_validation = inputs_validation.shape[0]
@@ -195,7 +195,7 @@ def objective(trial):
             batch_x, batch_y = eqx.filter_shard((batch_x, batch_y), sharding)
             val_loss = evaluate(model, batch_x, batch_y, sharding)
             val_loss_tracker += val_loss
-        val_loss_history.append(val_loss_tracker/(n_batches_test-1))
+        val_loss_history.append(val_loss_tracker/(n_batches_validation-1))
         print(f"Epoch {e+1}/{num_epochs}, Validation Loss (MSE): {val_loss_history[-1]:.5f}, Training Loss (Custom Loss 2): {np.mean(loss_history[-n_batches_train:-1]):.5f}")
     
     test_loss = 0

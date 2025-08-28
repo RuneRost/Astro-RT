@@ -164,7 +164,7 @@ The following summarizes the performance of our models on the test set:
 
 | Model name           | Speedup         | Absolute relative error |
 |----------------------|-----------------|-------------------------|
-| Steady-State Model   |     ~10,000x    |      2.6%               |
+| Steady-State Model   |     ~6,750x     |      2.6%               |
 | Recurrent Model      |     ~600x       |      2.8%               |
 
 
