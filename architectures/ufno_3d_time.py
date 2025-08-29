@@ -1,5 +1,3 @@
-# based on: https://github.com/gegewen/ufno/blob/main/ufno.py (rewritten to JAX + adaptions)
-
 import jax
 import jax.numpy as jnp
 import equinox as eqx
@@ -36,17 +34,17 @@ class Deconv3dBlock(eqx.Module):
 
 class U_net(eqx.Module):
     conv1: Conv3dBlock
-    conv1_1: Conv3dBlock
-    conv1_2: Conv3dBlock
+    conv1_add1: Conv3dBlock
+    conv1_add2: Conv3dBlock
     conv2: Conv3dBlock
-    conv2_1: Conv3dBlock
-    conv2_2: Conv3dBlock
+    conv2_add1: Conv3dBlock
+    conv2_add2: Conv3dBlock
     conv3: Conv3dBlock
-    conv3_1: Conv3dBlock
-    conv3_2: Conv3dBlock
+    conv3_add1: Conv3dBlock
+    conv3_add2: Conv3dBlock
     conv4: Conv3dBlock
-    conv4_1: Conv3dBlock
-    conv4_2: Conv3dBlock
+    conv4_add1: Conv3dBlock
+    conv4_add2: Conv3dBlock
     deconv3: Deconv3dBlock
     deconv2: Deconv3dBlock
     deconv1: Deconv3dBlock
@@ -57,17 +55,17 @@ class U_net(eqx.Module):
     def __init__(self, input_channels: int, output_channels: int, dropout_rate: float, *,key):
         keys = jax.random.split(key,17)
         self.conv1   = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=2, padding=0, p_do=dropout_rate, key=keys[0])
-        self.conv1_1 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=0, p_do=dropout_rate, key=keys[1])
-        self.conv1_2 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=1, p_do=dropout_rate, key=keys[2])
+        self.conv1_add1 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=0, p_do=dropout_rate, key=keys[1])
+        self.conv1_add2 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=1, p_do=dropout_rate, key=keys[2])
         self.conv2   = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=2, padding=0, p_do=dropout_rate, key=keys[3])
-        self.conv2_1 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=0, p_do=dropout_rate, key=keys[4])
-        self.conv2_2 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=1, p_do=dropout_rate, key=keys[5])
+        self.conv2_add1 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=0, p_do=dropout_rate, key=keys[4])
+        self.conv2_add2 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=1, p_do=dropout_rate, key=keys[5])
         self.conv3   = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=2, padding=0, p_do=dropout_rate, key=keys[6])
-        self.conv3_1 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=0, p_do=dropout_rate, key=keys[7])
-        self.conv3_2 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=1, p_do=dropout_rate, key=keys[6])
+        self.conv3_add1 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=0, p_do=dropout_rate, key=keys[7])
+        self.conv3_add2 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=1, p_do=dropout_rate, key=keys[6])
         self.conv4   = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=2, padding=0, p_do=dropout_rate, key=keys[8])
-        self.conv4_1 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=0, p_do=dropout_rate, key=keys[9])
-        self.conv4_2 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=1, p_do=dropout_rate, key=keys[10])
+        self.conv4_add1 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=0, p_do=dropout_rate, key=keys[9])
+        self.conv4_add2 = Conv3dBlock(input_channels,   output_channels, kernel_size=2, stride=1, padding=1, p_do=dropout_rate, key=keys[10])
         self.deconv3 = Deconv3dBlock(output_channels, output_channels, kernel_size=3, stride=2, padding=0, key=keys[11])
         self.deconv2 = Deconv3dBlock(output_channels*2, output_channels, kernel_size=2, stride=2, padding=0, key=keys[12]) 
         self.deconv1 = Deconv3dBlock(output_channels*2, output_channels, kernel_size=2, stride=2, padding=0, key=keys[13])
@@ -80,10 +78,10 @@ class U_net(eqx.Module):
             keys = 12 * [None]
         else:   
             keys = jax.random.split(key, 12) 
-        out_conv1 = self.conv1_2(self.conv1_1(self.conv1(x, key=keys[0], deterministic=deterministic), key=keys[1], deterministic=deterministic),  key=keys[2], deterministic=deterministic)
-        out_conv2 = self.conv2_2(self.conv2_1(self.conv2(out_conv1, key=keys[3], deterministic=deterministic), key=keys[4], deterministic=deterministic),  key=keys[5], deterministic=deterministic)
-        out_conv3 = self.conv3_2(self.conv3_1(self.conv3(out_conv2, key=keys[6], deterministic=deterministic), key=keys[7], deterministic=deterministic), key=keys[8], deterministic=deterministic)        
-        out_conv4 = self.conv4_2(self.conv4_1(self.conv4(out_conv3, key=keys[9], deterministic=deterministic), key=keys[10], deterministic=deterministic), key=keys[11], deterministic=deterministic)  
+        out_conv1 = self.conv1_add2(self.conv1_add1(self.conv1(x, key=keys[0], deterministic=deterministic), key=keys[1], deterministic=deterministic),  key=keys[2], deterministic=deterministic)
+        out_conv2 = self.conv2_add2(self.conv2_add1(self.conv2(out_conv1, key=keys[3], deterministic=deterministic), key=keys[4], deterministic=deterministic),  key=keys[5], deterministic=deterministic)
+        out_conv3 = self.conv3_add2(self.conv3_add1(self.conv3(out_conv2, key=keys[6], deterministic=deterministic), key=keys[7], deterministic=deterministic), key=keys[8], deterministic=deterministic)        
+        out_conv4 = self.conv4_add2(self.conv4_add1(self.conv4(out_conv3, key=keys[9], deterministic=deterministic), key=keys[10], deterministic=deterministic), key=keys[11], deterministic=deterministic)  
         out_deconv3 = self.deconv3(out_conv4)
         concat3   = jnp.concatenate([out_conv3, out_deconv3], axis=0)              
         out_deconv2   = self.deconv2(concat3)
@@ -156,10 +154,10 @@ class UFNO3d(eqx.Module):
     in_channels: int
     out_channels: int
     num_layers: int
-    fc0: eqx.nn.Linear
-    fc1: eqx.nn.Linear
-    fc2: eqx.nn.Linear
-    fc3: eqx.nn.Linear
+    fc_lifting: eqx.nn.Linear
+    fc_projection0: eqx.nn.Linear
+    fc_projection1: eqx.nn.Linear
+    fc_projection2: eqx.nn.Linear
     spectral_convs: list[SpectralConv3d]
     bypass_convs: list[eqx.nn.Conv1d]
     unets: list[U_net]
@@ -170,10 +168,10 @@ class UFNO3d(eqx.Module):
         self.width = width
         self.num_layers = num_layers
         keys = jax.random.split(key, 5)
-        self.fc0   = eqx.nn.Linear(self.in_channels, width, key=keys[0])
-        self.fc1 = eqx.nn.Linear(width, 128, key=keys[1])   
-        self.fc2 = eqx.nn.Linear(128, 512, key=keys[2])  
-        self.fc3 = eqx.nn.Linear(512, self.out_channels, key=keys[3])  
+        self.fc_lifting   = eqx.nn.Linear(self.in_channels, width, key=keys[0])
+        self.fc_projection0 = eqx.nn.Linear(width, 128, key=keys[1])   
+        self.fc_projection1 = eqx.nn.Linear(128, 512, key=keys[2])  
+        self.fc_projection2 = eqx.nn.Linear(512, self.out_channels, key=keys[3])  
         self.spectral_convs = []
         self.bypass_convs = []
         self.unets =[]
@@ -195,7 +193,7 @@ class UFNO3d(eqx.Module):
             keys = self.num_layers * [None]
         else:
             keys = jax.random.split(key, self.num_layers)
-        x = jax.vmap(jax.vmap(jax.vmap(self.fc0, in_axes=0), in_axes=0), in_axes=0)(x)
+        x = jax.vmap(jax.vmap(jax.vmap(self.fc_lifting, in_axes=0), in_axes=0), in_axes=0)(x)
         x = jnp.transpose(x, (3, 0, 1, 2))   
 
         for i in range(self.num_layers):
@@ -206,19 +204,12 @@ class UFNO3d(eqx.Module):
             x = jax.nn.relu(x)
 
         x = jnp.transpose(x, (1, 2, 3, 0)) 
-        x = jax.vmap(jax.vmap(jax.vmap(self.fc1, in_axes=0), in_axes=0), in_axes=0)(x)
+        x = jax.vmap(jax.vmap(jax.vmap(self.fc_projection0, in_axes=0), in_axes=0), in_axes=0)(x)
         x = jax.nn.relu(x)
-        x = jax.vmap(jax.vmap(jax.vmap(self.fc2, in_axes=0), in_axes=0), in_axes=0)(x) 
+        x = jax.vmap(jax.vmap(jax.vmap(self.fc_projection1, in_axes=0), in_axes=0), in_axes=0)(x) 
         x = jax.nn.relu(x)
-        x = jax.vmap(jax.vmap(jax.vmap(self.fc3, in_axes=0), in_axes=0), in_axes=0)(x)        
+        x = jax.vmap(jax.vmap(jax.vmap(self.fc_projection2, in_axes=0), in_axes=0), in_axes=0)(x)        
         x = jnp.transpose(x, (3, 0, 1, 2))
         x = x.reshape(self.out_channels,spatial_points_x+8, spatial_points_y+8, spatial_points_z+8)[:,:-8,:-8,:-8]
         return x
 
-    def count_params(self):
-        leaves = jax.tree_util.tree_leaves(self)
-        total = 0
-        for leaf in leaves:
-            if isinstance(leaf, jnp.ndarray):
-                total += leaf.size
-        return total
