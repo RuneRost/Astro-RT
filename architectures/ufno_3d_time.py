@@ -1,3 +1,7 @@
+# JAX/Equinox implementation of U-FNO.
+# Follows the approach from https://github.com/gegewen/ufno/.
+# Independently written; differs in framework, layer structure, normalization, and spectral weight handling.
+
 import jax
 import jax.numpy as jnp
 import equinox as eqx
