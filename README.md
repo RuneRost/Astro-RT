@@ -168,7 +168,7 @@ The following summarizes the performance of our models on the test set:
 | Recurrent Model      |     ~600x       |      2.8%               |
 
 
-The models achieves a speedup of more than 2 orders of magnitude while maintaining an average relative error below 4%. Additional results and analysis can be found in the appendix of the Paper.
+The models achieves a speedup of more than 2 orders of magnitude while maintaining an average relative error below 3%. Additional results and analysis can be found in the appendix of the Paper.
 
 
 ## Contributing
