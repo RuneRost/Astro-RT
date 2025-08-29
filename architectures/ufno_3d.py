@@ -67,10 +67,10 @@ class Conv3dBlock(eqx.Module):
     norm: eqx.nn.GroupNorm   
     dropout: eqx.nn.Dropout
 
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, stride: int, p_do: float, *, key):
-        padding = (kernel_size - 1) // 2
-        self.conv = eqx.nn.Conv3d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=padding, use_bias=False, key=key)
-        self.norm = eqx.nn.GroupNorm(groups=1, channels=out_channels, eps=1e-6, channelwise_affine=True)   
+    def __init__(self, channels: int, stride: int, p_do: float, *, key):
+        padding = 1
+        self.conv = eqx.nn.Conv3d(channels, channels, kernel_size=3, stride=stride, padding=padding, use_bias=False, key=key)
+        self.norm = eqx.nn.GroupNorm(groups=1, channels=channels, eps=1e-6, channelwise_affine=True)   
         self.dropout = eqx.nn.Dropout(p=p_do)
 
     def __call__(self, x, key=None, deterministic=False): 
@@ -84,8 +84,8 @@ class Conv3dBlock(eqx.Module):
 class Deconv3dBlock(eqx.Module):
     deconv: eqx.nn.ConvTranspose3d
 
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, *, key):
-        self.deconv = eqx.nn.ConvTranspose3d(in_channels, out_channels, kernel_size=kernel_size, stride=2, padding=1, use_bias=True, key=key)
+    def __init__(self, in_channels: int, out_channels: int, *, key):
+        self.deconv = eqx.nn.ConvTranspose3d(in_channels, out_channels, kernel_size=4, stride=2, padding=1, use_bias=True, key=key)
 
     def __call__(self, x: jnp.ndarray):
         x = self.deconv(x)
@@ -104,19 +104,19 @@ class U_net(eqx.Module):
     deconv0: Deconv3dBlock
     output_layer: eqx.nn.Conv3d
 
-    def __init__(self, input_channels: int, output_channels: int, kernel_size: int, dropout_rate: float, *,key):
+    def __init__(self, channels: int, dropout_rate: float, *,key):
         keys = jax.random.split(key, 9)
-        self.conv1   = Conv3dBlock(input_channels,   output_channels, kernel_size, stride=2, p_do=dropout_rate, key=keys[0])
-        self.conv2   = Conv3dBlock(input_channels,   output_channels, kernel_size, stride=2, p_do=dropout_rate, key=keys[1])
-        self.conv2_add = Conv3dBlock(input_channels,   output_channels, kernel_size, stride=1, p_do=dropout_rate, key=keys[2])
-        self.conv3   = Conv3dBlock(input_channels,   output_channels, kernel_size, stride=2, p_do=dropout_rate, key=keys[3])
-        self.conv3_add = Conv3dBlock(input_channels,   output_channels, kernel_size, stride=1, p_do=dropout_rate, key=keys[4])
+        self.conv1   = Conv3dBlock(channels, stride=2, p_do=dropout_rate, key=keys[0])
+        self.conv2   = Conv3dBlock(channels, stride=2, p_do=dropout_rate, key=keys[1])
+        self.conv2_add = Conv3dBlock(channels, stride=1, p_do=dropout_rate, key=keys[2])
+        self.conv3   = Conv3dBlock(channels, stride=2, p_do=dropout_rate, key=keys[3])
+        self.conv3_add = Conv3dBlock(channels, stride=1, p_do=dropout_rate, key=keys[4])
 
-        self.deconv2 = Deconv3dBlock(output_channels, output_channels, kernel_size=kernel_size+1, key=keys[5])
-        self.deconv1 = Deconv3dBlock(output_channels*2, output_channels, kernel_size=kernel_size+1, key=keys[6])
-        self.deconv0 = Deconv3dBlock(output_channels*2, output_channels, kernel_size=kernel_size+1, key=keys[7])
+        self.deconv2 = Deconv3dBlock(channels, channels, key=keys[5])
+        self.deconv1 = Deconv3dBlock(channels*2, channels, key=keys[6])
+        self.deconv0 = Deconv3dBlock(channels*2, channels, key=keys[7])
 
-        self.output_layer = eqx.nn.Conv3d(input_channels*2, output_channels, kernel_size=kernel_size, stride=1, padding=1, use_bias=True, key=keys[8])
+        self.output_layer = eqx.nn.Conv3d(channels*2, channels, kernel_size=3, stride=1, padding=1, use_bias=True, key=keys[8])
 
     def __call__(self, x: jnp.ndarray, key=None, deterministic=False):
         if deterministic:
@@ -139,8 +139,6 @@ class UFNO3d(eqx.Module):
     in_channels: int
     out_channels: int
     width: int
-    in_channels: int
-    out_channels: int
     num_layers: int
     fc_lifting: eqx.nn.Linear
     fc_projection_0: eqx.nn.Linear
@@ -168,7 +166,7 @@ class UFNO3d(eqx.Module):
             key1, key2, key3, splitkey = jax.random.split(splitkey, 4)  
             self.spectral_convs.append(SpectralConv3d(width, width, modes_x, modes_y, modes_z, key=key1)) 
             self.bypass_convs.append(eqx.nn.Conv1d(width, width, kernel_size=1, key=key2))
-            self.unets.append(U_net(width, width, 3, p_do, key=key3))
+            self.unets.append(U_net(width, p_do, key=key3))
     
     def __call__(self, x, key=None, deterministic=False):
         channels, spatial_points_x, spatial_points_y, spatial_points_z = x.shape
