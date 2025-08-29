@@ -155,8 +155,6 @@ class UFNO3d(eqx.Module):
     in_channels: int
     out_channels: int
     width: int
-    in_channels: int
-    out_channels: int
     num_layers: int
     fc_lifting: eqx.nn.Linear
     fc_projection0: eqx.nn.Linear

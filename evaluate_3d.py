@@ -335,17 +335,3 @@ if __name__ == "__main__":
 
     print(f"Prediction time for one sample: {t2-t1:.4f} seconds")
 
-    # alternative approach (even faster)
-    def step_fn(carry, _):
-        input = carry
-        output = model(input, deterministic=True)
-        return input, output
-    # warmup run
-    final_state, inputs_all = jax.lax.scan(step_fn, inputs_test[0], xs=None, length=1)
-
-    # measure time
-    t3 = time.time()
-    final_state, inputs_all = jax.lax.scan(step_fn, inputs_test[1], xs=None, length=1)
-    t4 = time.time()
-
-    print(f"Prediction time for one sample (faster approach): {t4-t3:.4f} seconds")
