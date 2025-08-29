@@ -43,7 +43,7 @@ def objective(trial):
     
     num_layers=6
 
-    num_epochs = 30
+    num_epochs = 40
     batch_size = 8 
     n_samples_train = inputs_train.shape[0]
     n_batches_train = jnp.ceil((n_samples_train/batch_size)).astype(int) 
