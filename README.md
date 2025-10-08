@@ -15,7 +15,7 @@ To address these shortcomings, we present a Neural Operator-based surrogate mode
 Our model is based on a specific class of Neural Operators known as the [Fourier Neural Operator](https://arxiv.org/abs/2010.08895) (FNO) that is combined it with a [U-Net](https://arxiv.org/abs/1505.04597) architecture, following the approach chosen in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697). 
 
 <p align="center">
-  <img src="plots/new_UFNO_Fig.png" alt=" " width="1000">
+  <img src="plots/new_UFNO_Fig.png" alt=" " width="800">
 </p>
 
 
