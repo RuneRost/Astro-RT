@@ -9,18 +9,15 @@ This repository contains the code accompanying the paper *Emulating Radiative Tr
 
 
 Radiative transfer is a cornerstone of computational astrophysics, providing the essential link between physical models and observational diagnostics. Simulating the propagation of radiation requires solving the radiative transfer equation (RTE), which, due to its high dimensionality, is computationally expensive to solve numerically.
-Accurate solutions require fine resolution, leading to significant challenges in terms of memory and computing time, particularly in multi-dimensional or time-dependent simulations.
-Proposed numerical methods often suffer from high computational costs, dimensionality issues, or instability while traditional deep learning approaches often struggle with generalization across discretizations and parameter settings, as well as stability in high-dimensional PDE problems. 
+In particular, computational cost becomes a major concern when incorporating on-the-fly radiative transport into hydrodynamic simulations to account for the effects of radiation on gas thermodynamics (via photoheating) and dynamics (via radiation pressure). 
 
-To address these shortcomings, we employ Neural Operators, to develop surrogate models for simulating radiative transfer. We present two Neural Operator–based surrogate models for three-dimensional radiative transfer, achieving significant speedups while maintaining high accuracy.
-These are based on a specific class of Neural Operators known as the [Fourier Neural Operator](https://arxiv.org/abs/2010.08895) (FNO) that is combined it with a [U-Net](https://arxiv.org/abs/1505.04597) architecture, following the approach chosen in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697). 
+To address these shortcomings, we present a Neural Operator-based surrogate model prototype designed to replace conventional on-the-fly radiative transfer solvers within hydrodynamic simulations, achieving significant speedups while maintaining high accuracy.
+Our model is based on a specific class of Neural Operators known as the [Fourier Neural Operator](https://arxiv.org/abs/2010.08895) (FNO) that is combined it with a [U-Net](https://arxiv.org/abs/1505.04597) architecture, following the approach chosen in [Gege Wen et al., 2022](https://arxiv.org/abs/2109.03697). 
 
 <p align="center">
-  <img src="plots/U-FNO-Fig.png" alt=" " width="1000">
+  <img src="plots/new_UFNO_Fig.png" alt=" " width="1000">
 </p>
 
-
-We developed two UFNO-based surrogate models for the simulation of three-dimensional radiative transfer. Our first model enables time-independent predictions of radiative intensity in the steady -state limit, while the second model allows us to model the temporal evolution of radiative intensity via recurrent application across time steps. Both models, as well as the code to train new models are provided in this git.
 
 ## Installation
 
@@ -37,11 +34,15 @@ To directly install all requirements necessary to run the codes in this git use 
 pip install -r requirements.txt
 ```
 
+To the best of our knowledge, no prior work has presented an emulator for time-dependent radiative transfer.
+Hencem to contextualize the performance of our approach relative to existing emulators, we also apply it to monochromatic three-dimensional static radiative transfer. Both scenarios are therefore presented in the following.
+
+
 ## Training 
 
-In our paper we consider two scenarios in which we want to emulate Radiative Transfer. For each scenario we provide code to train a surrogate model, as well as our pretrained surrogate model. The two scenarios for which we trained our models are:
-1. Prediction of steady-state radiative intensity setting in for $t \to \infty$ 
-2. Temporal evolution of radiative intensity from a starting point where $I_0=0$
+For each scenario we provide code to train a surrogate model, as well as our pretrained surrogate model. The two scenarios for which we trained our models are:
+1. Prediction of steady-state radiative intensity setting in for $t \to \infty$ (to contextualize the performance of our approach relative to existing emulators)
+2. Temporal evolution of radiative intensity from a starting point where $I_0=0$ (main model we present in our paper)
 
 To train and evaluate a steady-state model we provide a dataset consisting of samples, that each comprise an absorption and emission field as well as the corresponding steady-state radiative intensity. These are generated using the code from [here](https://anonymous.4open.science/r/Ray-trax-3F2E/).
 
@@ -90,10 +91,10 @@ Optimal hyperparameters for the recurrent model and its training:
 
 ## Pre-trained Models
 
-As mentioned above, the two pre-trained surrogate models we present in our paper can be found in the folder [`surrogate_models`](surrogate_models).
+As mentioned above, the two pre-trained surrogate models we mention in our paper can be found in the folder [`surrogate_models`](surrogate_models).
 
 - `ufno_3d.eqx` is the surrogate models for predicting the steady-state radiative intensity. It receives an absoprtion and emission field as input and predicts the stead state radiative intensity setting in for $t \to \infty$
-- `ufno_3d_time.eqx` is the surrogate models for predicting the temporal evolution of the radiative intensity.  It receives an absoprtion and emission field together with an radiative intensity (at time t) field as input and predicts the radiative intensity at time t+1 (thus deviating slightly from the configuration shown in the figure describing the architecture). Full temporal evolution is obtained by recursively feeding predictions back as input.
+- `ufno_3d_time.eqx` is the surrogate models for predicting the temporal evolution of the radiative intensity.  It receives an absoprtion and emission field together with an radiative intensity (at time t) field as input and predicts the radiative intensity at time t+1. Full temporal evolution is obtained by recursively feeding predictions back as input.
 
 In the code for training (and evaluation) you can change the input files to assess the performance of these models on different data. 
 
@@ -133,7 +134,7 @@ Alternatively you can create your own dataset using the code form [here](https:/
 
 Following plots show a comparison of the predictions of our surrogate models and the preprocessed numerically computed reference, respectively for a random sample from the test set.
 
-***Emulating radiative transfer in the steady-state case:***
+***Emulating radiative transfer in the steady-state case (to contextualize performance):***
 
 The following plot shows the preprocessed numerically computed steady-state radiative intensity (left), the model prediction (middle) and the corresponding residual (right), for a random sample from the test set.
 
@@ -141,12 +142,12 @@ The following plot shows the preprocessed numerically computed steady-state radi
   <img src="plots/3d_XY_plane.png" alt="ABCDE" width="500">
 </p>
 
-The predicted intensity field closely matches the numerical reference, preserving fine-scale structures. Residuals remain consistently low, with only a few exceptions, primarily near discontinuities.
+The predicted intensity field closely matches the numerical reference, preserving fine-scale structures. Residuals remain consistently low, with only a few exceptions, primarily near discontinuities. Our results match the results reported previous works.
 
 
 
 
-***Emulating radiative transfer in the temporal evolution case:***
+***Emulating radiative transfer in the temporal evolution case (our main model):***
 
 The following plot shows the temporal evolution of radiative intensity for a random sample from the test set, including the  preprocessed
 numerical reference (left), model prediction (middle), and corresponding residual (left). In the paper we show snapshots at selected timesteps of this evolution.
@@ -168,7 +169,7 @@ The following summarizes the performance of our models on the test set:
 | Recurrent Model      |     ~600x       |      2.8%               |
 
 
-The models achieves a speedup of more than 2 orders of magnitude while maintaining an average relative error below 3%. Additional results and analysis can be found in the appendix of the Paper.
+The models achieves a speedup of more than 2 orders of magnitude while maintaining an average relative error below 4%. Additional results and analysis can be found in the appendix of the Paper.
 
 
 ## Contributing
