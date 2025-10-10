@@ -35,7 +35,7 @@ pip install -r requirements.txt
 ```
 
 To the best of our knowledge, no prior work has presented an emulator for time-dependent radiative transfer.
-Hencem to contextualize the performance of our approach relative to existing emulators, we also apply it to monochromatic three-dimensional static radiative transfer. Both scenarios are therefore presented in the following.
+Hence, to contextualize the performance of our approach relative to existing emulators, we also apply it to monochromatic three-dimensional static radiative transfer. Both scenarios are therefore presented in the following.
 
 
 ## Training 
@@ -142,7 +142,7 @@ The following plot shows the preprocessed numerically computed steady-state radi
   <img src="plots/3d_XY_plane.png" alt="ABCDE" width="500">
 </p>
 
-The predicted intensity field closely matches the numerical reference, preserving fine-scale structures. Residuals remain consistently low, with only a few exceptions, primarily near discontinuities. Our results match the results reported previous works.
+The predicted intensity field closely matches the numerical reference, preserving fine-scale structures. Residuals remain consistently low, with only a few exceptions, primarily near discontinuities. Our results match or surpass the results reported previous works.
 
 
 
@@ -166,10 +166,10 @@ The following summarizes the performance of our models on the test set:
 | Model name           | Speedup         | Absolute relative error |
 |----------------------|-----------------|-------------------------|
 | Steady-State Model   |     ~6,750x     |      2.6%               |
-| Recurrent Model      |     ~600x       |      2.8%               |
+| Recurrent Model      |     ~600x       |      2.9%               |
 
 
-The models achieves a speedup of more than 2 orders of magnitude while maintaining an average relative error below 4%. Additional results and analysis can be found in the appendix of the Paper.
+The models both achieve a speedup of more than 2 orders of magnitude while maintaining an average relative error below 3%. Additional results and analysis can be found in the appendix of the Paper.
 
 
 ## Contributing
